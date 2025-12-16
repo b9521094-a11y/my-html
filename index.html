@@ -54,11 +54,12 @@
         <label for="task_select">工項內容</label> 
         <select id="task_select" onchange="toggleCustomInput('task_select', 'custom_task_div')">
             <option value="" disabled selected>請選擇工項</option>
-            <option value="模板">模板</option>
-            <option value="鋼筋">鋼筋</option>
-            <option value="水電">水電</option>
-            <option value="消防">消防</option>
+            <option value="模板組立">模板組立</option>
+            <option value="鋼筋綁紮">鋼筋綁紮</option>
+            <option value="水電配管">水電配管</option>
+            <option value="消防配管">消防配管</option>
             <option value="放樣">放樣</option>
+            <option value="混凝土澆置">混凝土澆置</option>
             <option value="custom_new">自行輸入 (可編輯)</option>
         </select>
         <div id="custom_task_div" class="hidden-input">
@@ -222,10 +223,10 @@
                     // 修正 1 & 2: 移除編號並將樓層移至最底部
                     const lines = [
                         `${project}`,         // 頂部
-                        `時間: ${date}`,
-                        `工項: ${task}`,
-                        `位置: ${position}`,
-                        `樓層: ${floor}`      // 底部
+                        `時間： ${date}`,
+                        `工程項目： ${task}`,
+                        `位置： ${position}`,
+                        `樓層： ${floor}`      // 底部
                     ];
 
                     let startX = canvas.width - padding;
