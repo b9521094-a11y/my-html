@@ -30,12 +30,12 @@
     <h2>📸 工程照片浮水印</h2>
     
     <div>
-        <label for="photo">1. 添加照片 (相機或相簿)</label>
+        <label for="photo">添加照片 (相機或相簿)</label>
         <input type="file" id="photo" accept="image/*">
         
         <hr>
 
-        <label for="project_select">2. 工程名稱</label>
+        <label for="project_select">工程名稱</label>
         <select id="project_select" onchange="toggleCustomInput('project_select', 'custom_project_div')">
             <option value="" disabled selected>請選擇工程</option>
             <option value="西港國中113年度廚房擴建工程">西港國中113年度廚房擴建工程</option>
@@ -46,21 +46,12 @@
             <input type="text" id="custom_project_name" placeholder="請輸入工程名稱">
         </div>
         
-        <label for="date_time">3. 拍攝時間</label>
+        <label for="date_time">拍攝時間</label>
         <input type="date" id="date_time">
 
-        <label for="floor_select">3. 樓層</label>
-        <select id="floor_select">
-            <option value="" disabled selected>請選擇樓層</option>
-            <option value="B1F">B1F</option>
-            <option value="1F">1F</option>
-            <option value="2F">2F</option>
-            <option value="3F">3F</option>
-            <option value="4F">4F</option>
-            <option value="5F">5F</option>
-        </select>
+       
         
-        <label for="task_select">4. 工項內容</label> 
+        <label for="task_select">工項內容</label> 
         <select id="task_select" onchange="toggleCustomInput('task_select', 'custom_task_div')">
             <option value="" disabled selected>請選擇工項</option>
             <option value="模板">模板</option>
@@ -73,20 +64,37 @@
         <div id="custom_task_div" class="hidden-input">
             <input type="text" id="custom_task_name" placeholder="請輸入工項內容">
         </div>
+        
+       
 
-        <label for="position_select">5. 位置</label>
+        <label for="position_select">位置</label>
         <select id="position_select">
             <option value="" disabled selected>請選擇位置</option>
             <option value="樑">樑</option>
             <option value="柱">柱</option>
+            <option value="版">版</option>
             <option value="天花板">天花板</option>
             <option value="地坪">地坪</option>
             <option value="牆">牆</option>
             <option value="樓梯">樓梯</option>
             <option value="水池">水池</option>
-            <option value="版">版</option> </select>
+             </select>
+         
+        <label for="floor_select">樓層</label>
+        <select id="floor_select">
+            <option value="" disabled selected>請選擇樓層</option>
+            <option value="B1F">B1F</option>
+            <option value="1F">1F</option>
+            <option value="2F">2F</option>
+            <option value="3F">3F</option>
+            <option value="4F">4F</option>
+            <option value="5F">5F</option>
+            <option value="6F">6F</option>
+            <option value="7F">7F</option>
+            <option value="8F">58F</option>
+        </select>
         
-        <div id="status_message"></div>
+         <div id="status_message"></div>
         
         <button type="button" onclick="generateWatermark()">生成帶有浮水印的照片</button>
     </div>
