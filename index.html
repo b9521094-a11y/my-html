@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>工程照片浮水印產生器 (最終穩定版)</title>
+    <title>工程照片浮水印產生器 (最終版本)</title>
     <style>
         body { font-family: 'Microsoft JhengHei', Arial, sans-serif; margin: 0; background-color: #f4f4f9; padding: 15px; }
         .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
@@ -14,7 +14,7 @@
         }
         select { height: 45px; background: white; }
         .hidden-input { display: none; margin-top: 10px; } 
-        #status_message { margin-top: 15px; text-align: center; font-weight: bold; min-height: 20px; color: red; } /* 狀態訊息區 */
+        #status_message { margin-top: 15px; text-align: center; font-weight: bold; min-height: 20px; color: red; } 
         button { background-color: #007bff; color: white; padding: 15px 20px; border: none; border-radius: 4px; cursor: pointer; margin-top: 25px; font-size: 18px; width: 100%; font-weight: bold; }
         button:hover { background-color: #0056b3; }
         
@@ -84,7 +84,7 @@
             <option value="牆">牆</option>
             <option value="樓梯">樓梯</option>
             <option value="水池">水池</option>
-        </select>
+            <option value="版">版</option> </select>
         
         <div id="status_message"></div>
         
@@ -117,11 +117,11 @@
         statusDiv.style.display = 'block';
     }
 
-    // 3. 修正: 切換自訂輸入框顯示 (更簡潔穩定的邏輯)
+    // 3. 切換自訂輸入框顯示 (適用於工程名稱和工項內容)
     function toggleCustomInput(selectId, divId) {
         const select = document.getElementById(selectId);
         const div = document.getElementById(divId);
-        const input = div.querySelector('input[type="text"]'); // 尋找 div 內的 input 元素
+        const input = div.querySelector('input[type="text"]'); 
 
         if (select.value === "custom_new") {
             div.style.display = "block";
@@ -140,7 +140,7 @@
             const customInput = document.getElementById(customInputId);
             const value = customInput ? customInput.value.trim() : "";
             
-            // 修正 2 檢查點: 如果選了自訂但沒輸入，返回 null 讓主要驗證知道錯誤
+            // 如果選了自訂但沒輸入，返回 null 讓主要驗證知道錯誤
             if (value === "") {
                 return null; 
             }
@@ -155,7 +155,7 @@
         
         const photoInput = document.getElementById('photo');
         
-        // 取得所有輸入值 (使用修正後的 getInputValue)
+        // 取得所有輸入值
         const project = getInputValue('project_select', 'custom_project_name');
         const date = document.getElementById('date_time').value;
         const floor = document.getElementById('floor_select').value;
@@ -167,17 +167,14 @@
             displayStatus("🚫 錯誤：請先選擇一張照片！", true);
             return;
         }
-
         if (project === null) {
             displayStatus("🚫 錯誤：請輸入工程名稱的自訂內容！", true);
             return;
         }
-
         if (task === null) {
             displayStatus("🚫 錯誤：請輸入工項內容的自訂內容！", true);
             return;
         }
-        
         if (!floor || floor === "" || !position || position === "") {
             displayStatus("🚫 錯誤：請確保所有下拉選單都已選擇！", true);
             return;
@@ -214,19 +211,21 @@
                     ctx.textBaseline = 'bottom';
                     ctx.textAlign = 'right';
 
+                    // 修正 1 & 2: 移除編號並將樓層移至最底部
                     const lines = [
-                        `5. 位置: ${position}`,     
-                        `4. 工項: ${task}`,
-                        `3. 樓層: ${floor}`,
-                        `3. 時間: ${date}`,
-                        `2. 工程名稱: ${project}`  
+                        `${project}`,         // 頂部
+                        `時間: ${date}`,
+                        `工項: ${task}`,
+                        `位置: ${position}`,
+                        `樓層: ${floor}`      // 底部
                     ];
 
                     let startX = canvas.width - padding;
                     let startY = canvas.height - padding;
 
                     lines.forEach((line, index) => {
-                        const y = startY - (index * lineHeight);
+                        // 倒序繪製，確保頂部文字在最上面
+                        const y = startY - ((lines.length - 1 - index) * lineHeight);
                         
                         // 黑色描邊 (讓文字清晰)
                         ctx.strokeStyle = 'black';
