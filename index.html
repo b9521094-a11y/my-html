@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工程照片浮水印產生器 (修改版)</title>
+    <style>
+        /* 保持樣式一致性 */
+        body { font-family: 'Microsoft JhengHei', Arial, sans-serif; margin: 20px; background-color: #f4f4f9; }
+        .container { max-width: 600px; margin: auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h2 { color: #007bff; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+        label { display: block; margin-top: 15px; font-weight: bold; color: #333; }
+        input[type="text"], input[type="date"], input[type="file"], select { 
+            width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; 
+        }
+        select { height: 40px; } /* 確保單選下拉選單高度正常 */
+        .hidden-input { display: none; margin-top: 10px; } 
+        button { background-color: #007bff; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px; font-size: 16px; width: 100%; }
+        button:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📸 工程照片浮水印設定</h2>
+    
+    <form action="/process_watermark" method="post" enctype="multipart/form-data">
+        
+        <label for="photo">1. 添加照片</label>
+        <input type="file" id="photo" name="photo" accept="image/*" required capture="camera">
+        
+        <hr>
+
+        <h3>浮水印內容輸入</h3>
+
+        <label for="project_select">2. 工程名稱</label>
+        <select id="project_select" name="project_select" required onchange="toggleCustomInput('project_select', 'custom_project_div')">
+            <option value="" disabled selected>請選擇一個工程</option>
+            <option value="西港國中113年度廚房擴建工程">西港國中113年度廚房擴建工程</option>
+            <option value="綜合行政大樓(含亞洲航空故事館空間)新建工程">綜合行政大樓(含亞洲航空故事館空間)新建工程</option>
+            <option value="custom_new">自行輸入 (可編輯)</option>
+        </select>
+        
+        <div id="custom_project_div" class="hidden-input">
+            <input type="text" id="custom_project_name" name="custom_project_name" placeholder="請在此輸入工程名稱">
+        </div>
+        
+        <label for="date_time">3. 拍攝時間 (年/月/日)</label>
+        <input type="date" id="date_time" name="date_time" required>
+
+        <label for="floor_select">3. 樓層</label>
+        <select id="floor_select" name="floor_select" required>
+            <option value="" disabled selected>請選擇一個樓層</option>
+            <option value="B1F">B1F</option>
+            <option value="1F">1F</option>
+            <option value="2F">2F</option>
+            <option value="3F">3F</option>
+            <option value="4F">4F</option>
+            <option value="5F">5F</option>
+        </select>
+        <label for="task_items">4. 工項內容 (單選)</label>
+        <select id="task_items" name="task_items" required>
+            <option value="" disabled selected>請選擇工項</option>
+            <option value="樑">樑</option>
+            <option value="柱">柱</option>
+            <option value="天花板">天花板</option>
+            <option value="牆">牆</option>
+            <option value="地板">地板</option>
+            <option value="樓梯">樓梯</option>
+            <option value="水電">水電</option>
+        </select>
+        
+        <button type="submit">生成帶有浮水印的照片</button>
+    </form>
+</div>
+
+<script>
+    // === JavaScript 實現功能 ===
+
+    // 1. 設定時間預設為當前時間 (補全原本截斷的程式碼)
+    function setDateTime() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const today = `${year}-${month}-${day}`;
+        document.getElementById('date_time').value = today;
+    }
+
+    // 2. 切換自訂輸入框的顯示/隱藏
+    function toggleCustomInput(selectId, divId) {
+        const selectElement = document.getElementById(selectId);
+        const divElement = document.getElementById(divId);
+        
+        if (!divElement) return; // 防止找不到元素報錯
+
+        if (selectElement.value === "custom_new") {
+            divElement.style.display = "block";
+            const input = divElement.querySelector('input');
+            if (input) input.setAttribute('required', 'required');
+        } else {
+            divElement.style.display = "none";
+            const input = divElement.querySelector('input');
+            if (input) input.removeAttribute('required');
+        }
+    }
+
+    // 頁面載入時執行
+    window.onload = function() {
+        setDateTime();
+    };
+</script>
+
+</body>
+</html>
