@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>工程照片浮水印產生器 (手機版)</title>
+    <title>工程照片浮水印產生器 (修正版)</title>
     <style>
         body { font-family: 'Microsoft JhengHei', Arial, sans-serif; margin: 0; background-color: #f4f4f9; padding: 15px; }
         .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
@@ -14,6 +14,7 @@
         }
         select { height: 45px; background: white; }
         .hidden-input { display: none; margin-top: 10px; } 
+        #status_message { margin-top: 15px; text-align: center; font-weight: bold; min-height: 20px; color: red; } /* 狀態訊息區 */
         button { background-color: #007bff; color: white; padding: 15px 20px; border: none; border-radius: 4px; cursor: pointer; margin-top: 25px; font-size: 18px; width: 100%; font-weight: bold; }
         button:hover { background-color: #0056b3; }
         
@@ -35,7 +36,7 @@
         <hr>
 
         <label for="project_select">2. 工程名稱</label>
-        <select id="project_select" onchange="toggleCustomInput('project_select', 'custom_project_div')">
+        <select id="project_select" onchange="toggleCustomInput('project_select', 'custom_project_div', 'custom_project_name')">
             <option value="" disabled selected>請選擇工程</option>
             <option value="西港國中113年度廚房擴建工程">西港國中113年度廚房擴建工程</option>
             <option value="綜合行政大樓(含亞洲航空故事館空間)新建工程">綜合行政大樓新建工程</option>
@@ -60,7 +61,7 @@
         </select>
         
         <label for="task_select">4. 工項內容 (單選)</label>
-        <select id="task_select" onchange="toggleCustomInput('task_select', 'custom_task_div')">
+        <select id="task_select" onchange="toggleCustomInput('task_select', 'custom_task_div', 'custom_task_name')">
             <option value="" disabled selected>請選擇工項</option>
             <option value="模板">模板</option>
             <option value="鋼筋">鋼筋</option>
@@ -85,12 +86,14 @@
             <option value="水池">水池</option>
         </select>
         
-        <button type="button" onclick="generateWatermark()">生成照片</button>
+        <div id="status_message"></div>
+        
+        <button type="button" onclick="generateWatermark()">生成帶有浮水印的照片</button>
     </div>
 
     <div id="result_area">
-        <h3>✅ 生成結果</h3>
-        <p class="download-hint">長按下方圖片即可儲存到手機相簿</p>
+        <h3>✅ 生成結果 (長按圖片可儲存)</h3>
+        <p class="download-hint">如果圖片沒有立即顯示，請確認所有欄位都已填寫並重試。</p>
         <img id="result_image" alt="生成結果">
     </div>
 </div>
@@ -103,16 +106,57 @@
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const day = String(now.getDate()).padStart(2, '0');
         document.getElementById('date_time').value = `${year}-${month}-${day}`;
+        document.getElementById('status_message').style.display = 'none'; // 預設隱藏
     };
 
-    // 2. 切換自訂輸入框顯示
-    function toggleCustomInput(selectId, divId) {
-        const select = document.getElementById(selectId);
-        const div = document.getElementById(divId);
-        div.style.display = (select.value === "custom_new") ? "block" : "none";
+    // 2. 顯示/隱藏狀態訊息
+    function displayStatus(message, isError = false) {
+        const statusDiv = document.getElementById('status_message');
+        statusDiv.textContent = message;
+        statusDiv.style.color = isError ? '#d9534f' : '#5cb85c'; // 紅色或綠色
+        statusDiv.style.display = 'block';
     }
 
-    // 3. 取得最終輸入值 (處理自訂輸入邏輯)
-    function getInputValue(selectId, customDivId, customInputId) {
+    // 3. 切換自訂輸入框顯示
+    function toggleCustomInput(selectId, divId, inputId) {
         const select = document.getElementById(selectId);
-        if (select.value
+        const div = document.getElementById(divId);
+        const input = document.getElementById(inputId);
+
+        if (select.value === "custom_new") {
+            div.style.display = "block";
+            if (input) input.setAttribute('required', 'required'); // 設為必填
+        } else {
+            div.style.display = "none";
+            if (input) input.removeAttribute('required'); // 移除必填
+        }
+    }
+
+    // 4. 取得最終輸入值 (處理自訂輸入邏輯)
+    function getInputValue(selectId, customInputId) {
+        const select = document.getElementById(selectId);
+        if (!select) return "";
+        
+        if (select.value === "custom_new") {
+            const customInput = document.getElementById(customInputId);
+            return customInput ? customInput.value.trim() : "";
+        }
+        return select.value;
+    }
+
+    // 5. 核心功能：生成浮水印照片
+    function generateWatermark() {
+        displayStatus("正在處理中，請稍候...");
+        
+        const photoInput = document.getElementById('photo');
+        if (!photoInput.files || !photoInput.files[0]) {
+            displayStatus("🚫 錯誤：請先選擇一張照片！", true);
+            return;
+        }
+
+        // 取得所有輸入值
+        const project = getInputValue('project_select', 'custom_project_name');
+        const date = document.getElementById('date_time').value;
+        const floor = document.getElementById('floor_select').value;
+        const task = getInputValue('task_select', 'custom_task_name');
+        const
