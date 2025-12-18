@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>工程照片浮水印</title>
+    <title>工程照片浮水印產生器</title>
     <style>
         /* --- 工業風設計 --- */
         body { 
@@ -35,6 +35,14 @@
             color: #343a40; 
             font-size: 1.05em;
         }
+        /* 標註非必填的提示 */
+        .optional-hint {
+            font-size: 0.8em;
+            color: #6c757d;
+            font-weight: normal;
+            margin-left: 5px;
+        }
+
         input[type="text"], input[type="date"], input[type="file"], select { 
             width: 100%; 
             padding: 12px; 
@@ -196,16 +204,16 @@
     <h2>📸 工程照片浮水印產生器</h2>
     
     <div>
-        <label for="photo">步驟 1: 拍照/上傳照片</label>
+        <label for="photo">步驟 1: 拍照/上傳照片 <span style="color:red">*</span></label>
         <input type="file" id="photo" accept="image/*">
         
         <hr>
 
-        <label for="project_select">步驟 2: 填寫資料 - 工程名稱</label>
+        <label for="project_select">步驟 2: 填寫資料 - 工程名稱 <span class="optional-hint">(選填)</span></label>
         <select id="project_select" onchange="toggleCustomInput('project_select', 'custom_project_div'); saveProjectName()">
-            <option value="" disabled selected>請選擇工程</option>
-            <option value="西港國中113年度廚房擴建工程">西港國中</option>
-            <option value="綜合行政大樓(含亞洲航空故事館空間)新建工程">亞洲航空</option>
+            <option value="" selected>請選擇工程</option>
+            <option value="西港國中113年度廚房擴建工程">西港國中113年度廚房擴建工程</option>
+            <option value="綜合行政大樓(含亞洲航空故事館空間)新建工程">綜合行政大樓新建工程</option>
             <option value="custom_new">自行輸入 (可編輯)</option>
         </select>
         <div id="custom_project_div" class="hidden-input">
@@ -223,9 +231,9 @@
 
         <div class="task-group">
             <div>
-                <label for="task_select">工項內容</label> 
+                <label for="task_select">工程項目 <span class="optional-hint">(選填)</span></label> 
                 <select id="task_select" onchange="toggleCustomInput('task_select', 'custom_task_div')">
-                    <option value="" disabled selected>請選擇工項</option>
+                    <option value="" selected>請選擇工項</option>
                     <option value="模板組立">模板組立</option>
                     <option value="鋼筋綁紮">鋼筋綁紮</option>
                     <option value="水電配管">水電配管</option>
@@ -240,28 +248,28 @@
             </div>
             
             <div>
-                <label for="task_remark">工項備註</label>
-                <input type="text" id="task_remark" placeholder="(選填)">
+                <label for="task_remark">工項備註 <span class="optional-hint">(選填)</span></label>
+                <input type="text" id="task_remark" placeholder="備註">
             </div>
         </div>
 
 
-        <label for="position_select">位置</label>
+        <label for="position_select">位置 <span class="optional-hint">(選填)</span></label>
         <select id="position_select">
-            <option value="" disabled selected>請選擇位置</option>
+            <option value="" selected>請選擇位置</option>
             <option value="樑">樑</option>
             <option value="柱">柱</option>
             <option value="版">版</option>
-            <option value="牆">牆</option>
             <option value="天花板">天花板</option>
             <option value="地坪">地坪</option>
+            <option value="牆">牆</option>
             <option value="樓梯">樓梯</option>
             <option value="水池">水池</option>
         </select>
          
-        <label for="floor_select">樓層</label>
+        <label for="floor_select">樓層 <span class="optional-hint">(選填)</span></label>
         <select id="floor_select">
-            <option value="" disabled selected>請選擇樓層</option>
+            <option value="" selected>請選擇樓層</option>
             <option value="B1F">B1F</option>
             <option value="1F">1F</option>
             <option value="2F">2F</option>
@@ -275,7 +283,7 @@
         
          <div id="status_message"></div>
         
-        <button type="button" class="btn-primary" onclick="generateWatermark()">步驟 3: 生成照片</button>
+        <button type="button" class="btn-primary" onclick="generateWatermark()">步驟 3: 生成帶有浮水印的照片</button>
         <button type="button" class="btn-secondary btn-clear" onclick="clearForm()">清除所有內容</button>
     </div>
 
@@ -290,10 +298,10 @@
             <label style="font-weight: bold; display: block; margin-top: 0; margin-bottom: 15px; color: #ffc107;">控制面板 (繪圖)</label>
             
             <div style="display: flex; justify-content: space-between;">
-                <button type="button" class="tool-btn" data-tool="line" data-selected="true" style="flex: 1; margin: 0 4px;">線條</button>
-                <button type="button" class="tool-btn" data-tool="circle" style="flex: 1; margin: 0 4px;">圓形</button>
-                <button type="button" class="tool-btn" data-tool="rect" style="flex: 1; margin: 0 4px;">方形</button>
-                <button type="button" class="tool-btn" data-tool="arrow" style="flex: 1; margin: 0 4px;">箭頭</button>
+                <button type="button" class="tool-btn" data-tool="line" data-selected="true" style="flex: 1; margin: 0 10px;">線條</button>
+                <button type="button" class="tool-btn" data-tool="circle" style="flex: 1; margin: 0 10px;">圓形</button>
+                <button type="button" class="tool-btn" data-tool="rect" style="flex: 1; margin: 0 10px;">方形</button>
+                <button type="button" class="tool-btn" data-tool="arrow" style="flex: 1; margin: 0 10px;">箭頭</button>
             </div>
             
             <label style="display: block; font-weight: bold; margin-top: 15px; color: #f8f9fa;">線條顏色</label>
@@ -304,8 +312,8 @@
             <input type="range" id="line_width" min="3" max="15" value="5" style="width: 100%; margin: 0; background-color: #6c757d; border: none;">
             
             <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-                <button type="button" class="tool-btn undo-btn" onclick="undoDrawing()" style="flex: 1; margin-right: 4px;">復原</button>
-                <button type="button" class="tool-btn redo-btn" onclick="redoDrawing()" style="flex: 1; margin-left: 4px; margin-right: 4px;">重做</button>
+                <button type="button" class="tool-btn undo-btn" onclick="undoDrawing()" style="flex: 1; margin-right: 4px;">復原 (Ctrl+Z)</button>
+                <button type="button" class="tool-btn redo-btn" onclick="redoDrawing()" style="flex: 1; margin-left: 4px; margin-right: 4px;">重做 (Ctrl+Y)</button>
                 <button type="button" class="tool-btn" onclick="clearDrawing()" style="background-color: #dc3545; flex: 1; margin-left: 4px;">清除繪圖</button>
             </div>
         </div>
@@ -376,10 +384,9 @@
 
         if (select.value === "custom_new") {
             div.style.display = "block";
-            if (input) input.setAttribute('required', 'required'); 
+            // 已移除必填屬性
         } else {
             div.style.display = "none";
-            if (input) input.removeAttribute('required'); 
         }
     }
     
@@ -434,7 +441,7 @@
             }
             return value;
         }
-        return select.value;
+        return select.value === "" ? null : select.value;
     }
     
     // 7. 下載圖片功能
@@ -491,7 +498,6 @@
                 document.body.appendChild(a);
                 a.click();
                 
-                // 延遲移除並釋放記憶體
                 setTimeout(() => {
                     document.body.removeChild(a);
                     window.URL.revokeObjectURL(url);
@@ -797,13 +803,13 @@
         }
     }
 
-    // 11. 核心功能：生成浮水印照片 (已修正高解析度問題)
+    // 11. 核心功能：生成浮水印照片
     function generateWatermark() {
         displayStatus("正在處理中，請稍候...");
         
         const photoInput = document.getElementById('photo');
         
-        // 取得所有輸入值
+        // 取得所有輸入值 (允許為 null)
         const project = getInputValue('project_select', 'custom_project_name');
         const date = document.getElementById('date_time').value;
         const floor = document.getElementById('floor_select').value;
@@ -812,9 +818,9 @@
         const showTime = document.getElementById('show_date_time').checked;
         const remark = document.getElementById('task_remark').value.trim(); 
 
-        // 檢查是否漏填
-        if (!photoInput.files || !photoInput.files[0] || project === null || task === null || !floor || floor === "" || !position || position === "") {
-            displayStatus("🚫 錯誤：請確保已選擇照片並填寫所有必填欄位！", true);
+        // 修改驗證：只有照片是必填
+        if (!photoInput.files || !photoInput.files[0]) {
+            displayStatus("🚫 錯誤：請務必選擇一張照片！", true);
             return;
         }
         
@@ -827,7 +833,7 @@
             img.onload = function() {
                 try {
                     // --- 核心修正：安全尺寸調整機制 ---
-                    const MAX_SIZE = 4096; // 將最大邊長限制在 4096 像素以確保瀏覽器順利處理
+                    const MAX_SIZE = 4096; 
                     let newWidth = img.width;
                     let newHeight = img.height;
 
@@ -842,92 +848,110 @@
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
 
-                    // 使用計算後的新尺寸
                     canvas.width = newWidth;
                     canvas.height = newHeight;
-                    // 繪製縮小後的圖片
                     ctx.drawImage(img, 0, 0, newWidth, newHeight);
                     
-                    // 設定繪圖 Canvas 的內部解析度，與縮小後的圖片一致
                     drawingCanvas.width = newWidth;
                     drawingCanvas.height = newHeight;
                     
-                    // 將繪圖內容繪製到浮水印圖層上 (如果已經有繪圖)
                     ctx.drawImage(drawingCanvas, 0, 0);
 
 
-                    // --- 繪製浮水印樣式設定 (自動適應新尺寸) ---
+                    // --- 繪製浮水印邏輯 ---
                     
+                    // 1. 檢查是否進入「舊式相機模式」：只有時間，沒有其他資訊
+                    const isOnlyTimeMode = showTime && date && !project && !task && !remark && !position && !floor;
+
                     const baseSize = canvas.width;
-                    const fontSize = Math.floor(baseSize * 0.025); 
-                    const lineHeight = fontSize * 1.4;
                     
-                    const paddingFactor = 0.8; 
-                    const padding = fontSize * paddingFactor; 
-                    
-                    ctx.font = `bold ${fontSize}px "Microsoft JhengHei", Arial`;
-                    ctx.textBaseline = 'bottom';
-                    
-                    ctx.textAlign = 'left'; 
-                    
-                    let startY = canvas.height - padding;
-
-                    // 浮水印內容建構
-                    let lines = [
-                        `${project}`,         
-                        `工項： ${task}`,
-                        `位置： ${position}`,
-                        `樓層： ${floor}`      
-                    ];
-                    
-                    if (showTime) {
-                        lines.splice(1, 0, `時間： ${date}`); 
-                    }
-                    if (remark) {
-                        const taskIndex = lines.findIndex(line => line.startsWith('工項：'));
-                        if (taskIndex !== -1) {
-                             lines.splice(taskIndex + 1, 0, `備註： ${remark}`);
-                        } else {
-                             lines.push(`備註： ${remark}`);
-                        }
-                    }
-
-                    // 1. 計算背景條寬度 (自動適應最長行)
-                    let maxWidth = 0;
-                    lines.forEach(line => {
-                        const currentWidth = ctx.measureText(line).width;
-                        if (currentWidth > maxWidth) {
-                            maxWidth = currentWidth;
-                        }
-                    });
-                    
-                    const backgroundWidth = maxWidth + 2 * padding; 
-                    const totalHeight = lines.length * lineHeight + (lines.length > 0 ? lineHeight * 0.5 : 0);
-                    
-                    const backgroundY = startY - totalHeight + lineHeight * 0.5;
-                    
-                    // 背景塊在右下角
-                    const backgroundX = canvas.width - backgroundWidth; 
-                    
-                    // 文字繪製的起始 X 點 (左邊界 + 內邊距)
-                    const startX = backgroundX + padding; 
-
-                    // 繪製黑色透明度 60% 的背景條
-                    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'; 
-                    ctx.fillRect(backgroundX, backgroundY, backgroundWidth, totalHeight + padding); 
-
-                    // 2. 繪製文字 (使用左對齊的 startX)
-                    lines.forEach((line, index) => {
-                        const y = startY - ((lines.length - 1 - index) * lineHeight);
+                    if (isOnlyTimeMode) {
+                        // === 舊式相機風格 (橘色、右下角、無黑底框) ===
                         
-                        // 文字設定：黃色填充文字與黑色描邊
-                        ctx.strokeStyle = 'black';
-                        ctx.lineWidth = fontSize / 8;
-                        ctx.strokeText(line, startX, y); // 左對齊到 startX
+                        // 設定字體：稍微大一點，Monospace (等寬字體) 比較像電子打印
+                        const retroFontSize = Math.floor(baseSize * 0.04); 
+                        ctx.font = `bold ${retroFontSize}px "Courier New", "Arial", sans-serif`;
+                        ctx.textBaseline = 'bottom';
+                        ctx.textAlign = 'right'; // 靠右對齊
 
-                        ctx.fillStyle = '#FFD700'; 
-                        ctx.fillText(line, startX, y); // 左對齊到 startX
-                    });
+                        // 設定顏色：橘色
+                        ctx.fillStyle = '#FF6600'; // 經典相機橘
+
+                        // 設定陰影：增加一點發光感/可讀性，模擬底片打印效果
+                        ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+                        ctx.shadowBlur = 2;
+                        ctx.shadowOffsetX = 1;
+                        ctx.shadowOffsetY = 1;
+
+                        // 計算位置：右下角，留一點邊距
+                        const padding = retroFontSize * 0.8;
+                        const x = canvas.width - padding;
+                        const y = canvas.height - padding;
+
+                        // 繪製文字 (直接畫日期，不加 "時間：" 前綴)
+                        ctx.fillText(date, x, y);
+
+                        // 重置陰影設定，避免影響後續繪圖 (如果有)
+                        ctx.shadowColor = "transparent";
+
+                    } else {
+                        // === 原有工業風模式 (黃字黑底、左下角) ===
+
+                        const fontSize = Math.floor(baseSize * 0.025); 
+                        const lineHeight = fontSize * 1.4;
+                        const paddingFactor = 0.8; 
+                        const padding = fontSize * paddingFactor; 
+                        
+                        ctx.font = `bold ${fontSize}px "Microsoft JhengHei", Arial`;
+                        ctx.textBaseline = 'bottom';
+                        ctx.textAlign = 'left'; 
+                        
+                        let startY = canvas.height - padding;
+
+                        // 智慧構建文字陣列
+                        let lines = [];
+                        if (project) lines.push(project);
+                        if (showTime && date) lines.push(`時間： ${date}`);
+                        if (task) lines.push(`工項： ${task}`);
+                        if (remark) lines.push(`備註： ${remark}`);
+                        if (position) lines.push(`位置： ${position}`);
+                        if (floor) lines.push(`樓層： ${floor}`);
+
+                        // 只有當有內容時才繪製
+                        if (lines.length > 0) {
+                            // 計算背景寬度
+                            let maxWidth = 0;
+                            lines.forEach(line => {
+                                const currentWidth = ctx.measureText(line).width;
+                                if (currentWidth > maxWidth) {
+                                    maxWidth = currentWidth;
+                                }
+                            });
+                            
+                            const backgroundWidth = maxWidth + 2 * padding; 
+                            const totalHeight = lines.length * lineHeight + (lines.length > 0 ? lineHeight * 0.5 : 0);
+                            
+                            const backgroundY = startY - totalHeight + lineHeight * 0.5;
+                            const backgroundX = canvas.width - backgroundWidth; 
+                            const startX = backgroundX + padding; 
+
+                            // 繪製半透明黑底
+                            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'; 
+                            ctx.fillRect(backgroundX, backgroundY, backgroundWidth, totalHeight + padding); 
+
+                            // 繪製文字
+                            lines.forEach((line, index) => {
+                                const y = startY - ((lines.length - 1 - index) * lineHeight);
+                                
+                                ctx.strokeStyle = 'black';
+                                ctx.lineWidth = fontSize / 8;
+                                ctx.strokeText(line, startX, y); 
+
+                                ctx.fillStyle = '#FFD700'; 
+                                ctx.fillText(line, startX, y); 
+                            });
+                        }
+                    }
 
                     // 輸出結果
                     const dataURL = canvas.toDataURL('image/jpeg', 0.9);
@@ -937,17 +961,16 @@
                     document.getElementById('result_area').style.display = 'block';
                     document.getElementById('download_button').style.display = 'block';
                     
-                    // 重置繪圖狀態和歷史記錄，並儲存第一步的空狀態
                     clearDrawing(); 
                     saveState(); 
                     drawingCanvas.style.pointerEvents = 'auto'; 
                     
-                    displayStatus("✅ 浮水印照片已成功生成！您現在可以開始繪圖。", false);
+                    displayStatus("✅ 浮水印照片已成功生成！", false);
                     document.getElementById('result_area').scrollIntoView({ behavior: 'smooth' });
 
                 } catch (error) {
                     console.error("Canvas Processing Error:", error);
-                    displayStatus(`🚫 內部錯誤：照片處理失敗。已嘗試尺寸調整，若仍失敗，請嘗試選擇檔案較小的照片。`, true);
+                    displayStatus(`🚫 內部錯誤：${error.message}`, true);
                 }
             };
         };
