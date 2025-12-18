@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>工程照片浮水印產生器 (工業風專業版)</title>
+    <title>工程照片浮水印</title>
     <style>
         /* --- 工業風設計 --- */
         body { 
@@ -204,8 +204,8 @@
         <label for="project_select">步驟 2: 填寫資料 - 工程名稱</label>
         <select id="project_select" onchange="toggleCustomInput('project_select', 'custom_project_div'); saveProjectName()">
             <option value="" disabled selected>請選擇工程</option>
-            <option value="西港國中113年度廚房擴建工程">西港國中113年度廚房擴建工程</option>
-            <option value="綜合行政大樓(含亞洲航空故事館空間)新建工程">綜合行政大樓新建工程</option>
+            <option value="西港國中113年度廚房擴建工程">西港國中</option>
+            <option value="綜合行政大樓(含亞洲航空故事館空間)新建工程">亞洲航空</option>
             <option value="custom_new">自行輸入 (可編輯)</option>
         </select>
         <div id="custom_project_div" class="hidden-input">
@@ -240,8 +240,8 @@
             </div>
             
             <div>
-                <label for="task_remark">工項備註 (選填)</label>
-                <input type="text" id="task_remark" placeholder="例如：配筋檢查完成、試壓合格">
+                <label for="task_remark">工項備註</label>
+                <input type="text" id="task_remark" placeholder="(選填)">
             </div>
         </div>
 
@@ -252,9 +252,9 @@
             <option value="樑">樑</option>
             <option value="柱">柱</option>
             <option value="版">版</option>
+            <option value="牆">牆</option>
             <option value="天花板">天花板</option>
             <option value="地坪">地坪</option>
-            <option value="牆">牆</option>
             <option value="樓梯">樓梯</option>
             <option value="水池">水池</option>
         </select>
@@ -275,7 +275,7 @@
         
          <div id="status_message"></div>
         
-        <button type="button" class="btn-primary" onclick="generateWatermark()">步驟 3: 生成帶有浮水印的照片</button>
+        <button type="button" class="btn-primary" onclick="generateWatermark()">步驟 3: 生成照片</button>
         <button type="button" class="btn-secondary btn-clear" onclick="clearForm()">清除所有內容</button>
     </div>
 
@@ -296,7 +296,7 @@
                 <button type="button" class="tool-btn" data-tool="arrow" style="flex: 1; margin: 0 4px;">箭頭</button>
             </div>
             
-            <label style="display: block; font-weight: bold; margin-top: 15px; color: #f8f9fa;">線條顏色 (6色)</label>
+            <label style="display: block; font-weight: bold; margin-top: 15px; color: #f8f9fa;">線條顏色</label>
             <div class="color-swatch-container">
                 <div class="color-swatch" data-color="#dc3545" style="background-color: #dc3545;" data-selected="true"></div> <div class="color-swatch" data-color="#007bff" style="background-color: #007bff;"></div> <div class="color-swatch" data-color="#28a745" style="background-color: #28a745;"></div> <div class="color-swatch" data-color="#ffc107" style="background-color: #ffc107;"></div> <div class="color-swatch" data-color="#fd7e14" style="background-color: #fd7e14;"></div> <div class="color-swatch" data-color="#6f42c1" style="background-color: #6f42c1;"></div> </div>
 
@@ -304,8 +304,8 @@
             <input type="range" id="line_width" min="3" max="15" value="5" style="width: 100%; margin: 0; background-color: #6c757d; border: none;">
             
             <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-                <button type="button" class="tool-btn undo-btn" onclick="undoDrawing()" style="flex: 1; margin-right: 4px;">復原 (Ctrl+Z)</button>
-                <button type="button" class="tool-btn redo-btn" onclick="redoDrawing()" style="flex: 1; margin-left: 4px; margin-right: 4px;">重做 (Ctrl+Y)</button>
+                <button type="button" class="tool-btn undo-btn" onclick="undoDrawing()" style="flex: 1; margin-right: 4px;">復原</button>
+                <button type="button" class="tool-btn redo-btn" onclick="redoDrawing()" style="flex: 1; margin-left: 4px; margin-right: 4px;">重做</button>
                 <button type="button" class="tool-btn" onclick="clearDrawing()" style="background-color: #dc3545; flex: 1; margin-left: 4px;">清除繪圖</button>
             </div>
         </div>
