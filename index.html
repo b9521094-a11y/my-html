@@ -3,37 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>工程照片浮水印產生器 (移動端優化版)</title>
+    <title>工程照片浮水印產生器 (工業風專業版)</title>
     <style>
-        /* --- 保留原始工業風設計 --- */
-        body { font-family: 'Microsoft JhengHei', Arial, sans-serif; margin: 0; background-color: #e0e0e0; padding: 25px; }
-        .container { max-width: 650px; margin: auto; background: #ffffff; padding: 30px; border-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 2px solid #495057; }
-        h2 { color: #343a40; border-bottom: 5px solid #ffc107; padding-bottom: 15px; text-align: center; margin-bottom: 25px; }
-        label { display: block; margin-top: 20px; font-weight: bold; color: #343a40; font-size: 1.05em; }
-        input[type="text"], input[type="date"], input[type="file"], select { width: 100%; padding: 12px; margin-top: 8px; border: 2px solid #6c757d; border-radius: 0; box-sizing: border-box; font-size: 16px; background-color: #f8f9fa; }
+        /* --- 工業風設計 --- */
+        body { 
+            font-family: 'Microsoft JhengHei', Arial, sans-serif; 
+            margin: 0; 
+            background-color: #e0e0e0; /* 模擬水泥地或金屬光澤的輕灰色 */
+            padding: 25px; 
+        }
+        .container { 
+            max-width: 650px; 
+            margin: auto; 
+            background: #ffffff; 
+            padding: 30px; 
+            border-radius: 4px; /* 銳利的邊角 */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); /* 厚重的陰影 */
+            border: 2px solid #495057; /* 深色邊框 */
+        }
+        h2 { 
+            color: #343a40; /* 濃郁的深灰標題 */
+            border-bottom: 5px solid #ffc107; /* 安全黃/橘色底線作為工業警示色 */
+            padding-bottom: 15px; 
+            text-align: center; 
+            margin-bottom: 25px;
+        }
+        label { 
+            display: block; 
+            margin-top: 20px; 
+            font-weight: bold; 
+            color: #343a40; 
+            font-size: 1.05em;
+        }
+        input[type="text"], input[type="date"], input[type="file"], select { 
+            width: 100%; 
+            padding: 12px; 
+            margin-top: 8px; 
+            border: 2px solid #6c757d; /* 灰色金屬邊框 */
+            border-radius: 0; /* 銳角 */
+            box-sizing: border-box; 
+            font-size: 16px;
+            background-color: #f8f9fa;
+        }
+        input[type="text"]:focus, input[type="date"]:focus, select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 1px rgba(0, 123, 255, 0.5); 
+            outline: none;
+        }
+        select { height: 45px; }
+        .hidden-input { display: none; margin-top: 10px; } 
+        #status_message { margin-top: 20px; text-align: center; font-weight: bold; min-height: 20px; color: red; } 
         
-        .btn-primary { background-color: #343a40; color: white; padding: 15px 20px; border: none; border-radius: 4px; cursor: pointer; margin-top: 25px; font-size: 18px; width: 100%; font-weight: bold; }
-        .btn-secondary { background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; font-size: 16px; width: 100%; }
-        .btn-clear { background-color: #dc3545; }
+        /* 統一按鈕樣式 - 工業風 */
+        .btn-primary { 
+            background-color: #343a40; /* 炭灰色主按鈕 */
+            color: white; 
+            padding: 15px 20px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            margin-top: 25px; 
+            font-size: 18px; 
+            width: 100%; 
+            font-weight: bold; 
+            transition: background-color 0.2s; 
+        }
+        .btn-primary:hover { background-color: #212529; }
+        .btn-secondary { 
+            background-color: #007bff; /* 藍色次要按鈕 */
+            color: white; 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            margin-top: 10px; 
+            font-size: 16px; 
+            width: 100%; 
+            transition: background-color 0.2s; 
+        }
+        .btn-secondary:hover { background-color: #0056b3; }
+        .btn-clear { background-color: #dc3545; } /* 紅色清除警告色 */
+        .btn-clear:hover { background-color: #c82333; }
 
-        /* 繪圖工具區 */
-        #drawing_tools { background-color: #343a40; padding: 15px; border-radius: 4px; border: 1px solid #6c757d; }
-        .tool-btn { background-color: #6c757d; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; margin: 2px; font-size: 14px; }
-        .tool-btn[data-selected="true"] { background-color: #007bff; box-shadow: 0 0 8px rgba(0, 123, 255, 0.6); }
-        .undo-btn { background-color: #ffc107 !important; color: #343a40 !important; font-weight: bold; }
+        /* 繪圖工具區塊 - 控制面板風格 */
+        #drawing_tools {
+            background-color: #343a40; /* 深色背景 */
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #6c757d;
+        }
+        #drawing_tools label {
+            color: #f8f9fa; /* 淺色文字 */
+            border-bottom: 1px solid #6c757d;
+            padding-bottom: 5px;
+        }
+
+        /* 繪圖工具按鈕樣式 */
+        .tool-btn { 
+            background-color: #6c757d; 
+            color: white; 
+            padding: 8px 12px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            margin: 2px; 
+            font-size: 14px; 
+            transition: background-color 0.2s;
+        }
+        .tool-btn:hover { background-color: #5a6268; }
+        .tool-btn[data-selected="true"] { 
+            background-color: #007bff; /* 選中為藍色 */
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.6); 
+        }
+        .undo-btn {
+            background-color: #ffc107 !important; /* 安全黃色 */
+            color: #343a40 !important;
+            font-weight: bold;
+        }
+        .undo-btn:hover {
+            background-color: #e0a800 !important;
+        }
+        .redo-btn {
+            background-color: #17a2b8 !important; /* 青色 */
+            color: white !important;
+            font-weight: bold;
+        }
+        .redo-btn:hover {
+            background-color: #138496 !important;
+        }
         
-        .color-swatch-container { display: flex; gap: 8px; justify-content: center; margin-top: 15px; }
-        .color-swatch { width: 35px; height: 35px; border-radius: 50%; cursor: pointer; border: 3px solid #6c757d; }
-        .color-swatch[data-selected="true"] { border-color: #ffc107; transform: scale(1.15); }
+        /* 顏色選擇區塊 */
+        .color-swatch-container {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        .color-swatch {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid #6c757d; /* 預設邊框 */
+            transition: transform 0.1s, border-color 0.2s, box-shadow 0.2s;
+        }
+        .color-swatch:hover {
+            transform: scale(1.1);
+        }
+        .color-swatch[data-selected="true"] {
+            border-color: #ffc107; /* 選中時邊框變為安全黃 */
+            transform: scale(1.15); 
+            box-shadow: 0 0 5px #ffc107;
+        }
+
+        /* 其他原有樣式保持不變 */
+        .checkbox-container { display: flex; align-items: center; font-weight: normal; padding: 0;}
+        .checkbox-container input[type="checkbox"] { width: auto; margin: 0 5px 0 0; }
+        .date-and-checkbox-group { display: flex; align-items: center; gap: 10px; margin-top: 5px;}
+        .task-group { display: flex; gap: 15px; }
+        .task-group > div { flex: 1; }
 
         #result_area { margin-top: 30px; text-align: center; display: none; }
-        #drawing_container { position: relative; max-width: 100%; display: inline-block; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        #result_image { max-width: 100%; border: 2px solid #343a40; display: block; }
-        #drawing_canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-        
-        .download-hint { color: #dc3545; margin-top: 10px; font-size: 14px; font-weight: bold; background: #fff3cd; padding: 10px; border-radius: 4px; }
-        .hidden-input { display: none; margin-top: 10px; }
-        #status_message { margin-top: 20px; text-align: center; font-weight: bold; min-height: 20px; }
+        #drawing_container { 
+            position: relative; 
+            max-width: 100%; 
+            display: inline-block; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border-radius: 4px;
+        }
+        #result_image { 
+            max-width: 100%; 
+            border: 2px solid #343a40; 
+            border-radius: 4px; 
+            display: block; 
+        }
+        #drawing_canvas { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            cursor: crosshair;
+            border-radius: 4px; 
+            pointer-events: none;
+            width: 100%; 
+            height: 100%;
+        }
+        .download-hint { color: #dc3545; margin-top: 10px; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -42,7 +196,7 @@
     <h2>📸 工程照片浮水印產生器</h2>
     
     <div>
-        <label for="photo">步驟 1: 拍照或從相簿選取照片</label>
+        <label for="photo">步驟 1: 拍照/上傳照片</label>
         <input type="file" id="photo" accept="image/*">
         
         <hr>
@@ -51,7 +205,7 @@
         <select id="project_select" onchange="toggleCustomInput('project_select', 'custom_project_div'); saveProjectName()">
             <option value="" disabled selected>請選擇工程</option>
             <option value="西港國中113年度廚房擴建工程">西港國中113年度廚房擴建工程</option>
-            <option value="綜合行政大樓新建工程">綜合行政大樓新建工程</option>
+            <option value="綜合行政大樓(含亞洲航空故事館空間)新建工程">綜合行政大樓新建工程</option>
             <option value="custom_new">自行輸入 (可編輯)</option>
         </select>
         <div id="custom_project_div" class="hidden-input">
@@ -59,254 +213,751 @@
         </div>
         
         <label for="date_time">拍攝時間</label>
-        <input type="date" id="date_time">
-
-        <label for="task_select">工項內容</label> 
-        <select id="task_select" onchange="toggleCustomInput('task_select', 'custom_task_div')">
-            <option value="" disabled selected>請選擇工項</option>
-            <option value="模板組立">模板組立</option>
-            <option value="鋼筋綁紮">鋼筋綁紮</option>
-            <option value="混凝土澆置">混凝土澆置</option>
-            <option value="custom_new">自行輸入 (可編輯)</option>
-        </select>
-        <div id="custom_task_div" class="hidden-input">
-            <input type="text" id="custom_task_name" placeholder="請輸入工項內容">
+        <div class="date-and-checkbox-group">
+            <input type="date" id="date_time" style="flex-grow: 1;">
+            <div class="checkbox-container" style="flex-shrink: 0; margin-top: 0;">
+                <input type="checkbox" id="show_date_time" checked>
+                <label for="show_date_time">顯示時間</label>
+            </div>
         </div>
+
+        <div class="task-group">
+            <div>
+                <label for="task_select">工項內容</label> 
+                <select id="task_select" onchange="toggleCustomInput('task_select', 'custom_task_div')">
+                    <option value="" disabled selected>請選擇工項</option>
+                    <option value="模板組立">模板組立</option>
+                    <option value="鋼筋綁紮">鋼筋綁紮</option>
+                    <option value="水電配管">水電配管</option>
+                    <option value="消防配管">消防配管</option>
+                    <option value="放樣">放樣</option>
+                    <option value="混凝土澆置">混凝土澆置</option>
+                    <option value="custom_new">自行輸入 (可編輯)</option>
+                </select>
+                <div id="custom_task_div" class="hidden-input">
+                    <input type="text" id="custom_task_name" placeholder="請輸入工項內容">
+                </div>
+            </div>
+            
+            <div>
+                <label for="task_remark">工項備註 (選填)</label>
+                <input type="text" id="task_remark" placeholder="例如：配筋檢查完成、試壓合格">
+            </div>
+        </div>
+
 
         <label for="position_select">位置</label>
         <select id="position_select">
-            <option value="樑">樑</option><option value="柱">柱</option><option value="版">版</option><option value="牆">牆</option>
+            <option value="" disabled selected>請選擇位置</option>
+            <option value="樑">樑</option>
+            <option value="柱">柱</option>
+            <option value="版">版</option>
+            <option value="天花板">天花板</option>
+            <option value="地坪">地坪</option>
+            <option value="牆">牆</option>
+            <option value="樓梯">樓梯</option>
+            <option value="水池">水池</option>
         </select>
          
         <label for="floor_select">樓層</label>
         <select id="floor_select">
-            <option value="1F">1F</option><option value="2F">2F</option><option value="B1F">B1F</option>
+            <option value="" disabled selected>請選擇樓層</option>
+            <option value="B1F">B1F</option>
+            <option value="1F">1F</option>
+            <option value="2F">2F</option>
+            <option value="3F">3F</option>
+            <option value="4F">4F</option>
+            <option value="5F">5F</option>
+            <option value="6F">6F</option>
+            <option value="7F">7F</option>
+            <option value="8F">8F</option>
         </select>
         
-        <div id="status_message"></div>
-        <button type="button" class="btn-primary" onclick="generateWatermark()">步驟 3: 生成照片</button>
-        <button type="button" class="btn-secondary btn-clear" onclick="location.reload()">清除所有內容</button>
+         <div id="status_message"></div>
+        
+        <button type="button" class="btn-primary" onclick="generateWatermark()">步驟 3: 生成帶有浮水印的照片</button>
+        <button type="button" class="btn-secondary btn-clear" onclick="clearForm()">清除所有內容</button>
     </div>
 
     <div id="result_area">
         <h3>✅ 生成結果與繪圖區</h3>
-        <div class="download-hint">手機提示：若下載按鈕無反應，請「長按圖片」選擇儲存。</div>
         <div id="drawing_container">
             <img id="result_image" alt="生成結果">
             <canvas id="drawing_canvas"></canvas>
         </div>
         
         <div id="drawing_tools">
-            <label style="color: #ffc107;">繪圖標記工具</label>
-            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-                <button type="button" class="tool-btn" data-tool="line" data-selected="true" style="flex: 1;">線條</button>
-                <button type="button" class="tool-btn" data-tool="circle" style="flex: 1;">圓形</button>
-                <button type="button" class="tool-btn" data-tool="rect" style="flex: 1;">方形</button>
+            <label style="font-weight: bold; display: block; margin-top: 0; margin-bottom: 15px; color: #ffc107;">控制面板 (繪圖)</label>
+            
+            <div style="display: flex; justify-content: space-between;">
+                <button type="button" class="tool-btn" data-tool="line" data-selected="true" style="flex: 1; margin: 0 4px;">線條</button>
+                <button type="button" class="tool-btn" data-tool="circle" style="flex: 1; margin: 0 4px;">圓形</button>
+                <button type="button" class="tool-btn" data-tool="rect" style="flex: 1; margin: 0 4px;">方形</button>
+                <button type="button" class="tool-btn" data-tool="arrow" style="flex: 1; margin: 0 4px;">箭頭</button>
             </div>
             
+            <label style="display: block; font-weight: bold; margin-top: 15px; color: #f8f9fa;">線條顏色 (6色)</label>
             <div class="color-swatch-container">
-                <div class="color-swatch" data-color="#dc3545" style="background-color: #dc3545;" data-selected="true"></div>
-                <div class="color-swatch" data-color="#007bff" style="background-color: #007bff;"></div>
-                <div class="color-swatch" data-color="#ffc107" style="background-color: #ffc107;"></div>
-            </div>
+                <div class="color-swatch" data-color="#dc3545" style="background-color: #dc3545;" data-selected="true"></div> <div class="color-swatch" data-color="#007bff" style="background-color: #007bff;"></div> <div class="color-swatch" data-color="#28a745" style="background-color: #28a745;"></div> <div class="color-swatch" data-color="#ffc107" style="background-color: #ffc107;"></div> <div class="color-swatch" data-color="#fd7e14" style="background-color: #fd7e14;"></div> <div class="color-swatch" data-color="#6f42c1" style="background-color: #6f42c1;"></div> </div>
+
+            <label for="line_width" style="display: block; font-weight: bold; margin-top: 20px; color: #f8f9fa;">線條粗細</label>
+            <input type="range" id="line_width" min="3" max="15" value="5" style="width: 100%; margin: 0; background-color: #6c757d; border: none;">
             
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button type="button" class="tool-btn undo-btn" onclick="undoDrawing()" style="flex: 1;">復原</button>
-                <button type="button" class="tool-btn" onclick="clearDrawing()" style="background-color: #dc3545; flex: 1;">清除標記</button>
+            <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                <button type="button" class="tool-btn undo-btn" onclick="undoDrawing()" style="flex: 1; margin-right: 4px;">復原 (Ctrl+Z)</button>
+                <button type="button" class="tool-btn redo-btn" onclick="redoDrawing()" style="flex: 1; margin-left: 4px; margin-right: 4px;">重做 (Ctrl+Y)</button>
+                <button type="button" class="tool-btn" onclick="clearDrawing()" style="background-color: #dc3545; flex: 1; margin-left: 4px;">清除繪圖</button>
             </div>
         </div>
 
-        <button type="button" class="btn-secondary" onclick="mergeAndDownload()" style="background-color: #28a745; margin-top: 20px;">儲存標記並下載照片</button> 
+        <p class="download-hint">長按上方圖片可儲存，或使用下載按鈕：</p>
+        <button type="button" class="btn-secondary" id="download_button" style="display: none;">下載照片</button> 
     </div>
 </div>
 
 <script>
-    // 繪圖與狀態全域變數
-    let drawingCanvas, drawingCtx, isDrawing = false;
-    let currentTool = 'line', lineColor = '#dc3545', lineWidth = 5;
-    let startX = 0, startY = 0, drawingHistory = [];
+    const LAST_PROJECT_KEY = 'last_project_name';
 
+    // 全域繪圖狀態
+    let drawingCanvas, drawingCtx;
+    let isDrawing = false;
+    let startX = 0, startY = 0;
+    let currentTool = 'line'; 
+    let lineColor = '#dc3545'; 
+    let lineWidth = 5;
+    
+    // 【復原功能】: 繪圖歷史堆疊
+    const MAX_HISTORY = 20; 
+    let drawingHistory = []; // 復原堆疊 (Undo Stack)
+    let redoStack = [];      // 重做堆疊 (Redo Stack)
+
+    // 1. 初始化設定
     window.onload = function() {
-        document.getElementById('date_time').valueAsDate = new Date();
-        setupDrawing();
-    };
-
-    function displayStatus(msg, isErr) {
-        const s = document.getElementById('status_message');
-        s.textContent = msg; s.style.color = isErr ? 'red' : 'green';
-    }
-
-    function toggleCustomInput(sid, did) {
-        document.getElementById(did).style.display = document.getElementById(sid).value === "custom_new" ? "block" : "none";
-    }
-
-    // 核心功能：生成浮水印
-    function generateWatermark() {
-        const file = document.getElementById('photo').files[0];
-        if (!file) { displayStatus("🚫 請選擇照片", true); return; }
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        document.getElementById('date_time').value = `${year}-${month}-${day}`;
+        document.getElementById('status_message').style.display = 'none';
         
-        displayStatus("處理中...", false);
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = new Image();
-            img.src = e.target.result;
-            img.onload = function() {
-                const maxDim = 4096;
-                let w = img.width, h = img.height;
-                if (w > maxDim || h > maxDim) {
-                    const ratio = Math.min(maxDim/w, maxDim/h);
-                    w *= ratio; h *= ratio;
+        document.getElementById('download_button').addEventListener('click', downloadImage);
+        document.getElementById('result_area').style.display = 'none';
+        
+        loadProjectName(); 
+        setupDrawing(); 
+        
+        // 快捷鍵監聽 (Ctrl+Z: 復原, Ctrl+Y: 重做)
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                if (e.key === 'z') {
+                    e.preventDefault();
+                    undoDrawing();
+                } else if (e.key === 'y') {
+                    e.preventDefault();
+                    redoDrawing();
                 }
-
-                const canvas = document.createElement('canvas');
-                canvas.width = w; canvas.height = h;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, w, h);
-
-                // 繪製浮水印 (右下角半透明黑底)
-                const fontSize = Math.floor(w * 0.025);
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-                ctx.fillRect(w * 0.6, h - (fontSize * 6), w * 0.4, fontSize * 6);
-                
-                ctx.font = `bold ${fontSize}px sans-serif`;
-                ctx.fillStyle = '#FFD700';
-                const proj = document.getElementById('project_select').value === "custom_new" ? document.getElementById('custom_project_name').value : document.getElementById('project_select').value;
-                const textX = w * 0.62;
-                ctx.fillText(`工程：${proj}`, textX, h - (fontSize * 4));
-                ctx.fillText(`時間：${document.getElementById('date_time').value}`, textX, h - (fontSize * 2.5));
-                ctx.fillText(`位置：${document.getElementById('floor_select').value} / ${document.getElementById('position_select').value}`, textX, h - (fontSize * 1));
-
-                document.getElementById('result_image').src = canvas.toDataURL('image/jpeg', 0.9);
-                drawingCanvas.width = w; drawingCanvas.height = h;
-                document.getElementById('result_area').style.display = 'block';
-                drawingCanvas.style.pointerEvents = 'auto';
-                displayStatus("✅ 已生成！您可以在圖上繪圖標記。", false);
-                saveState();
-            };
-        };
-        reader.readAsDataURL(file);
+            }
+        });
+    };
+    
+    // 2. 顯示/隱藏狀態訊息
+    function displayStatus(message, isError = false) {
+        const statusDiv = document.getElementById('status_message');
+        statusDiv.textContent = message;
+        statusDiv.style.color = isError ? '#dc3545' : '#1e7e34'; 
+        statusDiv.style.display = 'block';
     }
 
-    // 修正點：針對手機優化的下載功能
-    function mergeAndDownload() {
-        const resultImg = document.getElementById('result_image');
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = drawingCanvas.width; tempCanvas.height = drawingCanvas.height;
-        const tCtx = tempCanvas.getContext('2d');
+    // 3. 切換自訂輸入框顯示
+    function toggleCustomInput(selectId, divId) {
+        const select = document.getElementById(selectId);
+        const div = document.getElementById(divId);
+        const input = div.querySelector('input[type="text"]'); 
+
+        if (select.value === "custom_new") {
+            div.style.display = "block";
+            if (input) input.setAttribute('required', 'required'); 
+        } else {
+            div.style.display = "none";
+            if (input) input.removeAttribute('required'); 
+        }
+    }
+    
+    // 4. 儲存工程名稱 (略)
+    function saveProjectName() {
+        const select = document.getElementById('project_select');
+        let projectName = '';
+        if (select.value === "custom_new") {
+            projectName = document.getElementById('custom_project_name').value.trim();
+        } else if (select.value !== "") {
+            projectName = select.value;
+        }
+        if (projectName) {
+            localStorage.setItem(LAST_PROJECT_KEY, projectName);
+            if (select.value !== "custom_new") {
+                 document.getElementById('custom_project_name').value = projectName;
+            }
+        }
+    }
+    
+    // 5. 載入工程名稱 (略)
+    function loadProjectName() {
+        const lastProject = localStorage.getItem(LAST_PROJECT_KEY);
+        const select = document.getElementById('project_select');
+        if (lastProject) {
+            let found = false;
+            for (let i = 0; i < select.options.length; i++) {
+                if (select.options[i].value === lastProject) {
+                    select.value = lastProject;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                select.value = "custom_new";
+                document.getElementById('custom_project_name').value = lastProject;
+                document.getElementById('custom_project_div').style.display = "block";
+            } else {
+                document.getElementById('custom_project_div').style.display = "none";
+            }
+        }
+    }
+
+    // 6. 取得最終輸入值
+    function getInputValue(selectId, customInputId) {
+        const select = document.getElementById(selectId);
+        if (select.value === "custom_new") {
+            const customInput = document.getElementById(customInputId);
+            const value = customInput ? customInput.value.trim() : "";
+            if (value === "") {
+                return null; 
+            }
+            return value;
+        }
+        return select.value;
+    }
+    
+    // 7. 下載圖片功能
+    function downloadImage() {
+        const img = document.getElementById('result_image');
+        if (!img.src || img.src.startsWith('data:image/gif')) {
+            alert('請先生成照片！');
+            return;
+        }
         
-        const img = new Image();
-        img.src = resultImg.src;
-        img.onload = function() {
-            tCtx.drawImage(img, 0, 0);
-            tCtx.drawImage(drawingCanvas, 0, 0);
-            
-            const finalData = tempCanvas.toDataURL('image/jpeg', 0.9);
-            // 關鍵：將合併後的圖回填到 <img>，讓使用者長按儲存
-            resultImg.src = finalData;
-            
-            const link = document.createElement('a');
-            link.href = finalData;
-            link.download = `工程標記_${new Date().getTime()}.jpg`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            alert("嘗試下載中...\n若無反應，請「長按圖片」手動儲存照片。");
-        };
+        mergeAndDownload();
+    }
+    
+    // 輔助函式：將 DataURL 轉為 Blob (解決手機下載問題)
+    function dataURLtoBlob(dataurl) {
+        var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+        while(n--){
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new Blob([u8arr], {type:mime});
     }
 
-    // --- 繪圖邏輯 (支援觸控) ---
+    // 8. 合併繪圖和浮水印，並下載
+    function mergeAndDownload() {
+        const project = getInputValue('project_select', 'custom_project_name') || '工程照片';
+        const date = document.getElementById('date_time').value || '未知日期';
+        const originalImageSrc = document.getElementById('result_image').src; 
+
+        const img = new Image();
+        img.crossOrigin = 'Anonymous'; 
+        img.src = originalImageSrc;
+
+        img.onload = function() {
+            try {
+                const finalCanvas = document.createElement('canvas');
+                const finalCtx = finalCanvas.getContext('2d');
+
+                finalCanvas.width = img.width;
+                finalCanvas.height = img.height;
+                finalCtx.drawImage(img, 0, 0); 
+
+                finalCtx.drawImage(drawingCanvas, 0, 0); 
+
+                const dataURL = finalCanvas.toDataURL('image/jpeg', 0.95);
+                
+                // 修正：使用 Blob 下載以支援手機
+                const blob = dataURLtoBlob(dataURL);
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${project}_${date}_繪圖.jpg`; 
+                document.body.appendChild(a);
+                a.click();
+                
+                // 延遲移除並釋放記憶體
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 100);
+
+                displayStatus("✅ 照片已成功下載 (包含繪圖內容)！", false);
+
+            } catch (error) {
+                console.error("Download Merge Error:", error);
+                displayStatus(`🚫 下載合併失敗：${error.message}`, true);
+            }
+        };
+    }
+    
+    // 9. 清除所有內容 (略)
+    function clearForm() {
+        document.getElementById('photo').value = '';
+        document.getElementById('project_select').value = '';
+        document.getElementById('custom_project_name').value = '';
+        document.getElementById('custom_project_div').style.display = 'none';
+        
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        document.getElementById('date_time').value = `${year}-${month}-${day}`;
+        
+        document.getElementById('task_select').value = '';
+        document.getElementById('custom_task_name').value = '';
+        document.getElementById('custom_task_div').style.display = 'none';
+        document.getElementById('task_remark').value = '';
+        document.getElementById('position_select').value = '';
+        document.getElementById('floor_select').value = '';
+        document.getElementById('show_date_time').checked = true;
+
+        document.getElementById('status_message').style.display = 'none';
+        document.getElementById('result_area').style.display = 'none';
+        document.getElementById('result_image').src = '';
+        document.getElementById('download_button').style.display = 'none';
+        
+        if(drawingCanvas) drawingCanvas.style.pointerEvents = 'none';
+        clearDrawing();
+        
+        localStorage.removeItem(LAST_PROJECT_KEY);
+    }
+
+    // --- 繪圖功能實作 ---
+    // (getEventCoords, getCanvasCoords, drawArrowhead, setupDrawing 保持不變)
+    
+    // 10. 初始化繪圖
     function setupDrawing() {
         drawingCanvas = document.getElementById('drawing_canvas');
         drawingCtx = drawingCanvas.getContext('2d');
-
-        document.querySelectorAll('.tool-btn[data-tool]').forEach(btn => {
-            btn.onclick = () => {
-                currentTool = btn.dataset.tool;
-                document.querySelectorAll('.tool-btn').forEach(b => b.dataset.selected = "false");
-                btn.dataset.selected = "true";
-            };
+        
+        // 工具選擇
+        document.querySelectorAll('.tool-btn[data-tool]').forEach(button => {
+            button.addEventListener('click', () => {
+                currentTool = button.getAttribute('data-tool');
+                document.querySelectorAll('.tool-btn').forEach(btn => btn.removeAttribute('data-selected'));
+                button.setAttribute('data-selected', 'true');
+                isDrawing = false; 
+            });
         });
 
+        // 顏色選擇
         document.querySelectorAll('.color-swatch').forEach(swatch => {
-            swatch.onclick = () => {
-                lineColor = swatch.dataset.color;
-                document.querySelectorAll('.color-swatch').forEach(s => s.dataset.selected = "false");
-                swatch.dataset.selected = "true";
-            };
+            swatch.addEventListener('click', (e) => {
+                lineColor = e.target.getAttribute('data-color');
+                document.querySelectorAll('.color-swatch').forEach(s => s.removeAttribute('data-selected'));
+                e.target.setAttribute('data-selected', 'true');
+            });
         });
 
-        const start = (e) => {
-            if (drawingCanvas.style.pointerEvents === 'none') return;
-            isDrawing = true;
-            const pos = getPos(e);
-            startX = pos.x; startY = pos.y;
-            drawingCtx.strokeStyle = lineColor;
-            drawingCtx.lineWidth = drawingCanvas.width * 0.005;
-            drawingCtx.lineCap = 'round';
-            if (currentTool === 'line') drawingCtx.beginPath();
-        };
+        // 線條粗細選擇
+        document.getElementById('line_width').addEventListener('input', (e) => {
+            lineWidth = parseInt(e.target.value, 10);
+        });
 
-        const move = (e) => {
-            if (!isDrawing || currentTool !== 'line') return;
-            const pos = getPos(e);
-            drawingCtx.lineTo(pos.x, pos.y);
-            drawingCtx.stroke();
-        };
-
-        const end = (e) => {
-            if (!isDrawing) return;
-            if (currentTool !== 'line') {
-                const pos = getPos(e);
-                if (currentTool === 'rect') drawingCtx.strokeRect(startX, startY, pos.x - startX, pos.y - startY);
-                if (currentTool === 'circle') {
-                    const r = Math.sqrt((pos.x-startX)**2 + (pos.y-startY)**2);
-                    drawingCtx.beginPath(); drawingCtx.arc(startX, startY, r, 0, Math.PI*2); drawingCtx.stroke();
-                }
-            }
-            isDrawing = false;
-            saveState();
-        };
-
-        drawingCanvas.addEventListener('mousedown', start);
-        drawingCanvas.addEventListener('mousemove', move);
-        window.addEventListener('mouseup', end);
-        drawingCanvas.addEventListener('touchstart', (e) => { e.preventDefault(); start(e); });
-        drawingCanvas.addEventListener('touchmove', (e) => { e.preventDefault(); move(e); });
-        drawingCanvas.addEventListener('touchend', (e) => { e.preventDefault(); end(e); });
+        // 事件監聽 (滑鼠/觸控)
+        drawingCanvas.addEventListener('mousedown', startDrawing);
+        drawingCanvas.addEventListener('mousemove', draw);
+        drawingCanvas.addEventListener('mouseup', stopDrawing);
+        drawingCanvas.addEventListener('mouseout', stopDrawing);
+        drawingCanvas.addEventListener('touchstart', startDrawing);
+        drawingCanvas.addEventListener('touchmove', draw);
+        drawingCanvas.addEventListener('touchend', stopDrawing);
+        drawingCanvas.addEventListener('touchcancel', stopDrawing);
     }
-
-    function getPos(e) {
-        const rect = drawingCanvas.getBoundingClientRect();
-        const ev = e.touches ? e.touches[0] : e;
-        return {
-            x: (ev.clientX - rect.left) * (drawingCanvas.width / rect.width),
-            y: (ev.clientY - rect.top) * (drawingCanvas.height / rect.height)
-        };
-    }
-
+    
+    // 【復原功能】: 儲存當前畫布狀態
     function saveState() {
-        if (drawingHistory.length > 20) drawingHistory.shift();
-        drawingHistory.push(drawingCanvas.toDataURL());
+        const dataURL = drawingCanvas.toDataURL();
+        if (drawingHistory.length >= MAX_HISTORY) {
+            drawingHistory.shift(); 
+        }
+        drawingHistory.push(dataURL);
+        
+        // **重要修改**: 只要有新的繪圖動作，就清空「重做」堆疊，避免邏輯衝突
+        redoStack = [];
     }
 
+    // 【復原功能】: 執行復原 (Undo)
     function undoDrawing() {
-        if (drawingHistory.length <= 1) { clearDrawing(); return; }
-        drawingHistory.pop();
+        if (drawingHistory.length <= 1) {
+            clearDrawing(); 
+            drawingHistory = [];
+            redoStack = []; // 清空重做，因為已經空了
+            displayStatus("已復原到初始狀態。", false);
+            return;
+        }
+
+        // 1. 將當前狀態彈出並推入 Redo Stack
+        const currentState = drawingHistory.pop();
+        redoStack.push(currentState);
+
+        // 2. 取得上一個狀態
+        const lastState = drawingHistory[drawingHistory.length - 1]; 
+
+        // 3. 繪製上一個狀態
         const img = new Image();
-        img.src = drawingHistory[drawingHistory.length - 1];
-        img.onload = () => {
+        img.onload = function() {
             drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
             drawingCtx.drawImage(img, 0, 0);
+            displayStatus(`已復原至上一步。`, false);
         };
+        img.src = lastState;
+    }
+
+    // 【重做功能】: 執行重做 (Redo)
+    function redoDrawing() {
+        if (redoStack.length === 0) {
+            displayStatus("沒有可重做的步驟。", false);
+            return;
+        }
+
+        // 1. 從 Redo Stack 取出最近一次被 Undo 的狀態
+        const nextState = redoStack.pop();
+
+        // 2. 將該狀態放回 History Stack
+        drawingHistory.push(nextState);
+
+        // 3. 繪製該狀態
+        const img = new Image();
+        img.onload = function() {
+            drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+            drawingCtx.drawImage(img, 0, 0);
+            displayStatus(`已重做至下一步。`, false);
+        };
+        img.src = nextState;
+    }
+
+    function getEventCoords(e) {
+        if (e.touches && e.touches.length > 0) {
+            return e.touches[0];
+        }
+        if (e.changedTouches && e.changedTouches.length > 0) {
+            return e.changedTouches[0];
+        }
+        return e;
+    }
+
+    function getCanvasCoords(e) {
+        const rect = drawingCanvas.getBoundingClientRect();
+        const displayWidth = rect.width;
+        const displayHeight = rect.height;
+        
+        const intrinsicWidth = drawingCanvas.width;
+        const intrinsicHeight = drawingCanvas.height;
+
+        const scaleX = intrinsicWidth / displayWidth;
+        const scaleY = intrinsicHeight / displayHeight;
+        
+        return {
+            x: (e.clientX - rect.left) * scaleX,
+            y: (e.clientY - rect.top) * scaleY
+        };
+    }
+
+    function drawArrowhead(ctx, x, y, x0, y0, lineW) {
+        const angle = Math.atan2(y - y0, x - x0);
+        const headLen = lineW * 3; 
+        
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - headLen * Math.cos(angle - Math.PI / 6), y - headLen * Math.sin(angle - Math.PI / 6));
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - headLen * Math.cos(angle + Math.PI / 6), y - headLen * Math.sin(angle + Math.PI / 6));
+        ctx.stroke();
+    }
+
+    function startDrawing(e) {
+        if (drawingCanvas.style.pointerEvents !== 'auto') return; 
+        e.preventDefault(); 
+        
+        isDrawing = true;
+        const event = getEventCoords(e);
+        const coords = getCanvasCoords(event);
+        startX = coords.x;
+        startY = coords.y;
+
+        drawingCtx.strokeStyle = lineColor;
+        drawingCtx.lineWidth = lineWidth;
+        drawingCtx.lineCap = 'round';
+        drawingCtx.lineJoin = 'round';
+        
+        if (currentTool === 'line') {
+            drawingCtx.beginPath();
+            drawingCtx.moveTo(startX, startY);
+        }
+        if (currentTool !== 'line') {
+             // 非線條工具在開始繪製時，先保存當前狀態以便動態預覽
+             saveState(); 
+        }
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+        e.preventDefault(); 
+        
+        const event = getEventCoords(e);
+        const coords = getCanvasCoords(event);
+
+        if (currentTool === 'line') {
+            drawingCtx.lineTo(coords.x, coords.y);
+            drawingCtx.stroke();
+        } 
+    }
+
+    function stopDrawing(e) {
+        if (!isDrawing) return;
+        e.preventDefault(); 
+        
+        isDrawing = false;
+        
+        const event = getEventCoords(e);
+        const coords = getCanvasCoords(event);
+        const endX = coords.x;
+        const endY = coords.y;
+
+        const distance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+        
+        drawingCtx.strokeStyle = lineColor;
+        drawingCtx.lineWidth = lineWidth;
+
+        if (currentTool === 'rect' || currentTool === 'circle' || currentTool === 'arrow') {
+            if (drawingHistory.length > 0) {
+                 const lastState = drawingHistory[drawingHistory.length - 1];
+                 const img = new Image();
+                 img.onload = function() {
+                     drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+                     drawingCtx.drawImage(img, 0, 0);
+                     drawFinalShape(startX, startY, endX, endY);
+                     saveState(); 
+                 };
+                 img.src = lastState;
+            } else {
+                 drawFinalShape(startX, startY, endX, endY);
+                 saveState();
+            }
+        } else if (currentTool === 'line') {
+            if (distance < 5) {
+                 drawingCtx.beginPath();
+                 drawingCtx.arc(startX, startY, lineWidth / 2, 0, 2 * Math.PI);
+                 drawingCtx.fillStyle = lineColor;
+                 drawingCtx.fill();
+            }
+            saveState(); // 線條結束時保存狀態
+        }
+    }
+
+    function drawFinalShape(x0, y0, x1, y1) {
+         const w = x1 - x0;
+         const h = y1 - y0;
+         const distance = Math.sqrt(Math.pow(w, 2) + Math.pow(h, 2));
+
+         if (distance < 5 && currentTool !== 'arrow') return; 
+
+         if (currentTool === 'rect') {
+             drawingCtx.strokeRect(x0, y0, w, h);
+         } else if (currentTool === 'circle') {
+             const radiusX = Math.abs(w / 2);
+             const radiusY = Math.abs(h / 2);
+             const centerX = x0 + w / 2;
+             const centerY = y0 + h / 2;
+
+             drawingCtx.beginPath();
+             drawingCtx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+             drawingCtx.stroke();
+         } else if (currentTool === 'arrow') {
+             drawingCtx.beginPath();
+             drawingCtx.moveTo(x0, y0);
+             drawingCtx.lineTo(x1, y1);
+             drawingCtx.stroke();
+             drawArrowhead(drawingCtx, x1, y1, x0, y0, lineWidth);
+         }
     }
 
     function clearDrawing() {
-        drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
-        drawingHistory = []; saveState();
+        if(drawingCanvas) {
+             drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+             drawingHistory = []; 
+             redoStack = []; // 清除繪圖時也清空重做紀錄
+        }
     }
-    
-    function saveProjectName() {} // 預留擴充
+
+    // 11. 核心功能：生成浮水印照片 (已修正高解析度問題)
+    function generateWatermark() {
+        displayStatus("正在處理中，請稍候...");
+        
+        const photoInput = document.getElementById('photo');
+        
+        // 取得所有輸入值
+        const project = getInputValue('project_select', 'custom_project_name');
+        const date = document.getElementById('date_time').value;
+        const floor = document.getElementById('floor_select').value;
+        const task = getInputValue('task_select', 'custom_task_name');
+        const position = document.getElementById('position_select').value;
+        const showTime = document.getElementById('show_date_time').checked;
+        const remark = document.getElementById('task_remark').value.trim(); 
+
+        // 檢查是否漏填
+        if (!photoInput.files || !photoInput.files[0] || project === null || task === null || !floor || floor === "" || !position || position === "") {
+            displayStatus("🚫 錯誤：請確保已選擇照片並填寫所有必填欄位！", true);
+            return;
+        }
+        
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            const img = new Image();
+            img.src = e.target.result;
+
+            img.onload = function() {
+                try {
+                    // --- 核心修正：安全尺寸調整機制 ---
+                    const MAX_SIZE = 4096; // 將最大邊長限制在 4096 像素以確保瀏覽器順利處理
+                    let newWidth = img.width;
+                    let newHeight = img.height;
+
+                    if (newWidth > newHeight && newWidth > MAX_SIZE) {
+                        newHeight = Math.round(newHeight * MAX_SIZE / newWidth);
+                        newWidth = MAX_SIZE;
+                    } else if (newHeight > MAX_SIZE) {
+                        newWidth = Math.round(newWidth * MAX_SIZE / newHeight);
+                        newHeight = MAX_SIZE;
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+
+                    // 使用計算後的新尺寸
+                    canvas.width = newWidth;
+                    canvas.height = newHeight;
+                    // 繪製縮小後的圖片
+                    ctx.drawImage(img, 0, 0, newWidth, newHeight);
+                    
+                    // 設定繪圖 Canvas 的內部解析度，與縮小後的圖片一致
+                    drawingCanvas.width = newWidth;
+                    drawingCanvas.height = newHeight;
+                    
+                    // 將繪圖內容繪製到浮水印圖層上 (如果已經有繪圖)
+                    ctx.drawImage(drawingCanvas, 0, 0);
+
+
+                    // --- 繪製浮水印樣式設定 (自動適應新尺寸) ---
+                    
+                    const baseSize = canvas.width;
+                    const fontSize = Math.floor(baseSize * 0.025); 
+                    const lineHeight = fontSize * 1.4;
+                    
+                    const paddingFactor = 0.8; 
+                    const padding = fontSize * paddingFactor; 
+                    
+                    ctx.font = `bold ${fontSize}px "Microsoft JhengHei", Arial`;
+                    ctx.textBaseline = 'bottom';
+                    
+                    ctx.textAlign = 'left'; 
+                    
+                    let startY = canvas.height - padding;
+
+                    // 浮水印內容建構
+                    let lines = [
+                        `${project}`,         
+                        `工項： ${task}`,
+                        `位置： ${position}`,
+                        `樓層： ${floor}`      
+                    ];
+                    
+                    if (showTime) {
+                        lines.splice(1, 0, `時間： ${date}`); 
+                    }
+                    if (remark) {
+                        const taskIndex = lines.findIndex(line => line.startsWith('工項：'));
+                        if (taskIndex !== -1) {
+                             lines.splice(taskIndex + 1, 0, `備註： ${remark}`);
+                        } else {
+                             lines.push(`備註： ${remark}`);
+                        }
+                    }
+
+                    // 1. 計算背景條寬度 (自動適應最長行)
+                    let maxWidth = 0;
+                    lines.forEach(line => {
+                        const currentWidth = ctx.measureText(line).width;
+                        if (currentWidth > maxWidth) {
+                            maxWidth = currentWidth;
+                        }
+                    });
+                    
+                    const backgroundWidth = maxWidth + 2 * padding; 
+                    const totalHeight = lines.length * lineHeight + (lines.length > 0 ? lineHeight * 0.5 : 0);
+                    
+                    const backgroundY = startY - totalHeight + lineHeight * 0.5;
+                    
+                    // 背景塊在右下角
+                    const backgroundX = canvas.width - backgroundWidth; 
+                    
+                    // 文字繪製的起始 X 點 (左邊界 + 內邊距)
+                    const startX = backgroundX + padding; 
+
+                    // 繪製黑色透明度 60% 的背景條
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'; 
+                    ctx.fillRect(backgroundX, backgroundY, backgroundWidth, totalHeight + padding); 
+
+                    // 2. 繪製文字 (使用左對齊的 startX)
+                    lines.forEach((line, index) => {
+                        const y = startY - ((lines.length - 1 - index) * lineHeight);
+                        
+                        // 文字設定：黃色填充文字與黑色描邊
+                        ctx.strokeStyle = 'black';
+                        ctx.lineWidth = fontSize / 8;
+                        ctx.strokeText(line, startX, y); // 左對齊到 startX
+
+                        ctx.fillStyle = '#FFD700'; 
+                        ctx.fillText(line, startX, y); // 左對齊到 startX
+                    });
+
+                    // 輸出結果
+                    const dataURL = canvas.toDataURL('image/jpeg', 0.9);
+                    const resultImg = document.getElementById('result_image');
+                    resultImg.src = dataURL;
+                    
+                    document.getElementById('result_area').style.display = 'block';
+                    document.getElementById('download_button').style.display = 'block';
+                    
+                    // 重置繪圖狀態和歷史記錄，並儲存第一步的空狀態
+                    clearDrawing(); 
+                    saveState(); 
+                    drawingCanvas.style.pointerEvents = 'auto'; 
+                    
+                    displayStatus("✅ 浮水印照片已成功生成！您現在可以開始繪圖。", false);
+                    document.getElementById('result_area').scrollIntoView({ behavior: 'smooth' });
+
+                } catch (error) {
+                    console.error("Canvas Processing Error:", error);
+                    displayStatus(`🚫 內部錯誤：照片處理失敗。已嘗試尺寸調整，若仍失敗，請嘗試選擇檔案較小的照片。`, true);
+                }
+            };
+        };
+        
+        reader.onerror = function(e) {
+            displayStatus("🚫 檔案讀取失敗！", true);
+        };
+
+        reader.readAsDataURL(photoInput.files[0]);
+    }
 </script>
 
 </body>
