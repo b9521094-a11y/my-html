@@ -3,985 +3,287 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>工程照片浮水印產生器</title>
+    <title>工程紀錄生成器</title>
+    <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
-        /* --- 工業風設計 --- */
-        body { 
-            font-family: 'Microsoft JhengHei', Arial, sans-serif; 
-            margin: 0; 
-            background-color: #e0e0e0; /* 模擬水泥地或金屬光澤的輕灰色 */
-            padding: 25px; 
-        }
-        .container { 
-            max-width: 650px; 
-            margin: auto; 
-            background: #ffffff; 
-            padding: 30px; 
-            border-radius: 4px; /* 銳利的邊角 */
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); /* 厚重的陰影 */
-            border: 2px solid #495057; /* 深色邊框 */
-        }
-        h2 { 
-            color: #343a40; /* 濃郁的深灰標題 */
-            border-bottom: 5px solid #ffc107; /* 安全黃/橘色底線作為工業警示色 */
-            padding-bottom: 15px; 
-            text-align: center; 
-            margin-bottom: 25px;
-        }
-        label { 
-            display: block; 
-            margin-top: 20px; 
-            font-weight: bold; 
-            color: #343a40; 
-            font-size: 1.05em;
-        }
-        /* 標註非必填的提示 */
-        .optional-hint {
-            font-size: 0.8em;
-            color: #6c757d;
-            font-weight: normal;
-            margin-left: 5px;
-        }
-
-        input[type="text"], input[type="date"], input[type="file"], select { 
-            width: 100%; 
-            padding: 12px; 
-            margin-top: 8px; 
-            border: 2px solid #6c757d; /* 灰色金屬邊框 */
-            border-radius: 0; /* 銳角 */
-            box-sizing: border-box; 
-            font-size: 16px;
-            background-color: #f8f9fa;
-        }
-        input[type="text"]:focus, input[type="date"]:focus, select:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 0 1px rgba(0, 123, 255, 0.5); 
-            outline: none;
-        }
-        select { height: 45px; }
-        .hidden-input { display: none; margin-top: 10px; } 
-        #status_message { margin-top: 20px; text-align: center; font-weight: bold; min-height: 20px; color: red; } 
+        body { font-family: "Microsoft JhengHei", sans-serif; padding: 10px; background-color: #f0f2f5; }
+        .container { background: white; padding: 15px; border-radius: 8px; max-width: 800px; margin: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 12px; }
+        .flex-row { display: flex; gap: 10px; }
+        .flex-row > div { flex: 1; }
+        label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 14px; }
+        select, input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
         
-        /* 統一按鈕樣式 - 工業風 */
-        .btn-primary { 
-            background-color: #343a40; /* 炭灰色主按鈕 */
-            color: white; 
-            padding: 15px 20px; 
-            border: none; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            margin-top: 25px; 
-            font-size: 18px; 
-            width: 100%; 
-            font-weight: bold; 
-            transition: background-color 0.2s; 
-        }
-        .btn-primary:hover { background-color: #212529; }
-        .btn-secondary { 
-            background-color: #007bff; /* 藍色次要按鈕 */
-            color: white; 
-            padding: 10px 20px; 
-            border: none; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            margin-top: 10px; 
-            font-size: 16px; 
-            width: 100%; 
-            transition: background-color 0.2s; 
-        }
-        .btn-secondary:hover { background-color: #0056b3; }
-        .btn-clear { background-color: #dc3545; } /* 紅色清除警告色 */
-        .btn-clear:hover { background-color: #c82333; }
-
-        /* 繪圖工具區塊 - 控制面板風格 */
-        #drawing_tools {
-            background-color: #343a40; /* 深色背景 */
-            padding: 15px;
-            border-radius: 4px;
-            border: 1px solid #6c757d;
-        }
-        #drawing_tools label {
-            color: #f8f9fa; /* 淺色文字 */
-            border-bottom: 1px solid #6c757d;
-            padding-bottom: 5px;
-        }
-
-        /* 繪圖工具按鈕樣式 */
-        .tool-btn { 
-            background-color: #6c757d; 
-            color: white; 
-            padding: 8px 12px; 
-            border: none; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            margin: 2px; 
-            font-size: 14px; 
-            transition: background-color 0.2s;
-        }
-        .tool-btn:hover { background-color: #5a6268; }
-        .tool-btn[data-selected="true"] { 
-            background-color: #007bff; /* 選中為藍色 */
-            box-shadow: 0 0 8px rgba(0, 123, 255, 0.6); 
-        }
-        .undo-btn {
-            background-color: #ffc107 !important; /* 安全黃色 */
-            color: #343a40 !important;
-            font-weight: bold;
-        }
-        .undo-btn:hover {
-            background-color: #e0a800 !important;
-        }
-        .redo-btn {
-            background-color: #17a2b8 !important; /* 青色 */
-            color: white !important;
-            font-weight: bold;
-        }
-        .redo-btn:hover {
-            background-color: #138496 !important;
-        }
+        .photo-card { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 6px; background: #fff; }
+        .photo-card input[type="text"] { margin-top: 8px; padding: 12px; font-size: 15px; border: 1px solid #aaa; }
         
-        /* 顏色選擇區塊 */
-        .color-swatch-container {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            margin-top: 15px;
-        }
-        .color-swatch {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 3px solid #6c757d; /* 預設邊框 */
-            transition: transform 0.1s, border-color 0.2s, box-shadow 0.2s;
-        }
-        .color-swatch:hover {
-            transform: scale(1.1);
-        }
-        .color-swatch[data-selected="true"] {
-            border-color: #ffc107; /* 選中時邊框變為安全黃 */
-            transform: scale(1.15); 
-            box-shadow: 0 0 5px #ffc107;
-        }
+        .checkbox-group { display: flex; gap: 10px; margin-top: 5px; font-size: 13px; }
+        
+        button { width: 100%; padding: 12px; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; margin-top: 10px; font-weight: bold; }
+        .btn-preview { background: #28a745; color: white; }
+        .btn-download { background: #007bff; color: white; }
 
-        /* 其他原有樣式保持不變 */
-        .checkbox-container { display: flex; align-items: center; font-weight: normal; padding: 0;}
-        .checkbox-container input[type="checkbox"] { width: auto; margin: 0 5px 0 0; }
-        .date-and-checkbox-group { display: flex; align-items: center; gap: 10px; margin-top: 5px;}
-        .task-group { display: flex; gap: 15px; }
-        .task-group > div { flex: 1; }
-
-        #result_area { margin-top: 30px; text-align: center; display: none; }
-        #drawing_container { 
-            position: relative; 
-            max-width: 100%; 
-            display: inline-block; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            border-radius: 4px;
-        }
-        #result_image { 
-            max-width: 100%; 
-            border: 2px solid #343a40; 
-            border-radius: 4px; 
-            display: block; 
-        }
-        #drawing_canvas { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            cursor: crosshair;
-            border-radius: 4px; 
-            pointer-events: none;
-            width: 100%; 
-            height: 100%;
-        }
-        .download-hint { color: #dc3545; margin-top: 10px; font-size: 14px; }
+        #preview-area { margin-top: 20px; background: white; padding: 20px; display: none; border: 1px solid #ccc; }
+        .report-title-container { text-align: center; position: relative; margin-bottom: 10px; }
+        .report-title { font-size: 24px; font-weight: bold; margin: 0; }
+        .report-sn { position: absolute; right: 0; bottom: 0; font-size: 12px; font-weight: normal; }
+        
+        .outer-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .outer-table td { border: 1px solid black; padding: 6px; font-size: 14px; word-break: break-all; vertical-align: middle; }
+        .label-cell { width: 80px; text-align: center; background-color: #f9f9f9; }
+        .content-cell { text-align: left; }
+        
+        .photo-row { display: flex; border: 1px solid black; border-top: none; height: 220px; }
+        .photo-box { width: 65%; border-right: 1px solid black; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 5px; }
+        .photo-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .info-box { width: 35%; display: flex; flex-direction: column; }
+        .info-item { flex: 1; border-bottom: 1px solid black; padding: 5px; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; text-align: left; font-size: 13px; }
+        .info-item:last-child { border-bottom: none; }
+        .info-label { font-weight: bold; margin-bottom: 2px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>📸 工程照片浮水印產生器</h2>
+    <div class="form-group">
+        <label>工程名稱</label>
+        <select id="projName" onchange="toggleEdit('projName')">
+            <option value="小新國小蓮潭里校區國小第二期暨增設國中新建工程採購案">小新國小二期工程</option>
+            <option value="西港國中">西港國中</option>
+            <option value="亞洲航空">亞洲航空</option>
+            <option value="other">---自定義編輯---</option>
+        </select>
+        <input type="text" id="projName_edit" style="display:none; margin-top:5px;" placeholder="請輸入工程名稱">
+    </div>
+
+    <div class="flex-row">
+        <div class="form-group">
+            <label>查驗項目</label>
+            <select id="inspectItem" onchange="toggleEdit('inspectItem')">
+                <option value="模板工程">模板工程</option>
+                <option value="鋼筋綁紮">鋼筋綁紮</option>
+                <option value="other">---自定義編輯---</option>
+            </select>
+            <input type="text" id="inspectItem_edit" style="display:none; margin-top:5px;">
+        </div>
+        <div class="form-group">
+            <label>查驗位置</label>
+            <select id="inspectPos" onchange="toggleEdit('inspectPos')">
+                <option value="K棟基礎">K棟基礎</option>
+                <option value="1F">1F</option>
+                <option value="2F">2F</option>
+                <option value="other">---自定義編輯---</option>
+            </select>
+            <input type="text" id="inspectPos_edit" style="display:none; margin-top:5px;">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>查驗日期</label>
+        <input type="date" id="inspectDate">
+    </div>
+
+    <div id="upload-sections">
+        <div class="photo-card">
+            <label>照片 1</label>
+            <input type="file" id="img1" accept="image/*" capture="environment">
+            <input type="text" id="desc1" placeholder="輸入說明文字 (點此輸入)">
+            <div class="checkbox-group"><label><input type="checkbox" id="status1"> 改善前</label></div>
+        </div>
+        <div class="photo-card">
+            <label>照片 2</label>
+            <input type="file" id="img2" accept="image/*" capture="environment">
+            <input type="text" id="desc2" placeholder="輸入說明文字 (點此輸入)">
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="status2_ing"> 改善中</label>
+                <label><input type="checkbox" id="status2_after"> 改善後</label>
+            </div>
+        </div>
+        <div class="photo-card">
+            <label>照片 3</label>
+            <input type="file" id="img3" accept="image/*" capture="environment">
+            <input type="text" id="desc3" placeholder="輸入說明文字 (點此輸入)">
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="status3_ing"> 改善中</label>
+                <label><input type="checkbox" id="status3_after"> 改善後</label>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn-preview" onclick="generatePreview()">產生預覽</button>
     
-    <div>
-        <label for="photo">步驟 1: 拍照/上傳照片 <span style="color:red">*</span></label>
-        <input type="file" id="photo" accept="image/*">
-        
-        <hr>
-
-        <label for="project_select">步驟 2: 填寫資料 - 工程名稱 <span class="optional-hint">(選填)</span></label>
-        <select id="project_select" onchange="toggleCustomInput('project_select', 'custom_project_div'); saveProjectName()">
-            <option value="" selected>請選擇工程</option>
-            <option value="西港國中113年度廚房擴建工程">西港國中113年度廚房擴建工程</option>
-            <option value="綜合行政大樓(含亞洲航空故事館空間)新建工程">綜合行政大樓新建工程</option>
-            <option value="custom_new">自行輸入 (可編輯)</option>
-        </select>
-        <div id="custom_project_div" class="hidden-input">
-            <input type="text" id="custom_project_name" placeholder="請輸入工程名稱" oninput="saveProjectName()">
+    <div id="preview-area">
+        <div class="report-title-container">
+            <p class="report-title">自主檢查照片</p>
+            <span class="report-sn">編號: <input type="text" id="serialNo" style="width:40px; border:none; border-bottom:1px solid #000;"></span>
         </div>
-        
-        <label for="date_time">拍攝時間</label>
-        <div class="date-and-checkbox-group">
-            <input type="date" id="date_time" style="flex-grow: 1;">
-            <div class="checkbox-container" style="flex-shrink: 0; margin-top: 0;">
-                <input type="checkbox" id="show_date_time" checked>
-                <label for="show_date_time">顯示時間</label>
-            </div>
-        </div>
-
-        <div class="task-group">
-            <div>
-                <label for="task_select">工程項目 <span class="optional-hint">(選填)</span></label> 
-                <select id="task_select" onchange="toggleCustomInput('task_select', 'custom_task_div')">
-                    <option value="" selected>請選擇工項</option>
-                    <option value="模板組立">模板組立</option>
-                    <option value="鋼筋綁紮">鋼筋綁紮</option>
-                    <option value="水電配管">水電配管</option>
-                    <option value="消防配管">消防配管</option>
-                    <option value="放樣">放樣</option>
-                    <option value="混凝土澆置">混凝土澆置</option>
-                    <option value="custom_new">自行輸入 (可編輯)</option>
-                </select>
-                <div id="custom_task_div" class="hidden-input">
-                    <input type="text" id="custom_task_name" placeholder="請輸入工項內容">
-                </div>
-            </div>
-            
-            <div>
-                <label for="task_remark">工項備註 <span class="optional-hint">(選填)</span></label>
-                <input type="text" id="task_remark" placeholder="備註">
-            </div>
-        </div>
-
-
-        <label for="position_select">位置 <span class="optional-hint">(選填)</span></label>
-        <select id="position_select">
-            <option value="" selected>請選擇位置</option>
-            <option value="樑">樑</option>
-            <option value="柱">柱</option>
-            <option value="版">版</option>
-            <option value="天花板">天花板</option>
-            <option value="地坪">地坪</option>
-            <option value="牆">牆</option>
-            <option value="樓梯">樓梯</option>
-            <option value="水池">水池</option>
-        </select>
-         
-        <label for="floor_select">樓層 <span class="optional-hint">(選填)</span></label>
-        <select id="floor_select">
-            <option value="" selected>請選擇樓層</option>
-            <option value="B1F">B1F</option>
-            <option value="1F">1F</option>
-            <option value="2F">2F</option>
-            <option value="3F">3F</option>
-            <option value="4F">4F</option>
-            <option value="5F">5F</option>
-            <option value="6F">6F</option>
-            <option value="7F">7F</option>
-            <option value="8F">8F</option>
-        </select>
-        
-         <div id="status_message"></div>
-        
-        <button type="button" class="btn-primary" onclick="generateWatermark()">步驟 3: 生成帶有浮水印的照片</button>
-        <button type="button" class="btn-secondary btn-clear" onclick="clearForm()">清除所有內容</button>
+        <table class="outer-table">
+            <tr>
+                <td class="label-cell">工程名稱</td>
+                <td colspan="3" class="content-cell" id="p_proj"></td>
+            </tr>
+            <tr>
+                <td class="label-cell">承包廠商</td>
+                <td class="content-cell">勝冠營造股份有限公司</td>
+                <td class="label-cell" style="width:80px;">查驗日期</td>
+                <td class="content-cell" id="p_date"></td>
+            </tr>
+            <tr>
+                <td class="label-cell">查驗項目</td>
+                <td colspan="3" class="content-cell" id="p_item"></td>
+            </tr>
+        </table>
+        <div id="p_photos"></div>
     </div>
 
-    <div id="result_area">
-        <h3>✅ 生成結果與繪圖區</h3>
-        <div id="drawing_container">
-            <img id="result_image" alt="生成結果">
-            <canvas id="drawing_canvas"></canvas>
-        </div>
-        
-        <div id="drawing_tools">
-            <label style="font-weight: bold; display: block; margin-top: 0; margin-bottom: 15px; color: #ffc107;">控制面板 (繪圖)</label>
-            
-            <div style="display: flex; justify-content: space-between;">
-                <button type="button" class="tool-btn" data-tool="line" data-selected="true" style="flex: 1; margin: 0 10px;">線條</button>
-                <button type="button" class="tool-btn" data-tool="circle" style="flex: 1; margin: 0 10px;">圓形</button>
-                <button type="button" class="tool-btn" data-tool="rect" style="flex: 1; margin: 0 10px;">方形</button>
-                <button type="button" class="tool-btn" data-tool="arrow" style="flex: 1; margin: 0 10px;">箭頭</button>
-            </div>
-            
-            <label style="display: block; font-weight: bold; margin-top: 15px; color: #f8f9fa;">線條顏色</label>
-            <div class="color-swatch-container">
-                <div class="color-swatch" data-color="#dc3545" style="background-color: #dc3545;" data-selected="true"></div> <div class="color-swatch" data-color="#007bff" style="background-color: #007bff;"></div> <div class="color-swatch" data-color="#28a745" style="background-color: #28a745;"></div> <div class="color-swatch" data-color="#ffc107" style="background-color: #ffc107;"></div> <div class="color-swatch" data-color="#fd7e14" style="background-color: #fd7e14;"></div> <div class="color-swatch" data-color="#6f42c1" style="background-color: #6f42c1;"></div> </div>
-
-            <label for="line_width" style="display: block; font-weight: bold; margin-top: 20px; color: #f8f9fa;">線條粗細</label>
-            <input type="range" id="line_width" min="3" max="15" value="5" style="width: 100%; margin: 0; background-color: #6c757d; border: none;">
-            
-            <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-                <button type="button" class="tool-btn undo-btn" onclick="undoDrawing()" style="flex: 1; margin-right: 4px;">復原 (Ctrl+Z)</button>
-                <button type="button" class="tool-btn redo-btn" onclick="redoDrawing()" style="flex: 1; margin-left: 4px; margin-right: 4px;">重做 (Ctrl+Y)</button>
-                <button type="button" class="tool-btn" onclick="clearDrawing()" style="background-color: #dc3545; flex: 1; margin-left: 4px;">清除繪圖</button>
-            </div>
-        </div>
-
-        <p class="download-hint">長按上方圖片可儲存，或使用下載按鈕：</p>
-        <button type="button" class="btn-secondary" id="download_button" style="display: none;">下載照片</button> 
-    </div>
+    <button class="btn-download" onclick="downloadWord()">下載 Word 檔</button>
 </div>
 
 <script>
-    const LAST_PROJECT_KEY = 'last_project_name';
+    document.getElementById('inspectDate').valueAsDate = new Date();
 
-    // 全域繪圖狀態
-    let drawingCanvas, drawingCtx;
-    let isDrawing = false;
-    let startX = 0, startY = 0;
-    let currentTool = 'line'; 
-    let lineColor = '#dc3545'; 
-    let lineWidth = 5;
-    
-    // 【復原功能】: 繪圖歷史堆疊
-    const MAX_HISTORY = 20; 
-    let drawingHistory = []; // 復原堆疊 (Undo Stack)
-    let redoStack = [];      // 重做堆疊 (Redo Stack)
+    function toggleEdit(id) {
+        const select = document.getElementById(id);
+        const editInput = document.getElementById(id + '_edit');
+        editInput.style.display = (select.value === 'other') ? 'block' : 'none';
+    }
 
-    // 1. 初始化設定
-    window.onload = function() {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        document.getElementById('date_time').value = `${year}-${month}-${day}`;
-        document.getElementById('status_message').style.display = 'none';
+    function getVal(id) {
+        const select = document.getElementById(id);
+        return select.value === 'other' ? document.getElementById(id + '_edit').value : select.value;
+    }
+
+    function toROC(dateStr) {
+        const d = new Date(dateStr);
+        return `${d.getFullYear() - 1911}年${d.getMonth() + 1}月${d.getDate()}日`;
+    }
+
+    async function generatePreview() {
+        document.getElementById('p_proj').innerText = getVal('projName');
+        document.getElementById('p_date').innerText = toROC(document.getElementById('inspectDate').value);
+        document.getElementById('p_item').innerText = getVal('inspectItem');
         
-        document.getElementById('download_button').addEventListener('click', downloadImage);
-        document.getElementById('result_area').style.display = 'none';
-        
-        loadProjectName(); 
-        setupDrawing(); 
-        
-        // 快捷鍵監聽 (Ctrl+Z: 復原, Ctrl+Y: 重做)
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey || e.metaKey) {
-                if (e.key === 'z') {
-                    e.preventDefault();
-                    undoDrawing();
-                } else if (e.key === 'y') {
-                    e.preventDefault();
-                    redoDrawing();
-                }
+        const photoContainer = document.getElementById('p_photos');
+        photoContainer.innerHTML = '';
+        document.getElementById('preview-area').style.display = 'block';
+
+        for(let i=1; i<=3; i++) {
+            const file = document.getElementById('img'+i).files[0];
+            const desc = document.getElementById('desc'+i).value;
+            let status = "";
+            if(i===1 && document.getElementById('status1').checked) status = "改善前";
+            if(i>1) {
+                if(document.getElementById(`status${i}_ing`).checked) status = "改善中";
+                if(document.getElementById(`status${i}_after`).checked) status = "改善後";
             }
-        });
-    };
-    
-    // 2. 顯示/隱藏狀態訊息
-    function displayStatus(message, isError = false) {
-        const statusDiv = document.getElementById('status_message');
-        statusDiv.textContent = message;
-        statusDiv.style.color = isError ? '#dc3545' : '#1e7e34'; 
-        statusDiv.style.display = 'block';
-    }
 
-    // 3. 切換自訂輸入框顯示
-    function toggleCustomInput(selectId, divId) {
-        const select = document.getElementById(selectId);
-        const div = document.getElementById(divId);
-        const input = div.querySelector('input[type="text"]'); 
-
-        if (select.value === "custom_new") {
-            div.style.display = "block";
-            // 已移除必填屬性
-        } else {
-            div.style.display = "none";
-        }
-    }
-    
-    // 4. 儲存工程名稱 (略)
-    function saveProjectName() {
-        const select = document.getElementById('project_select');
-        let projectName = '';
-        if (select.value === "custom_new") {
-            projectName = document.getElementById('custom_project_name').value.trim();
-        } else if (select.value !== "") {
-            projectName = select.value;
-        }
-        if (projectName) {
-            localStorage.setItem(LAST_PROJECT_KEY, projectName);
-            if (select.value !== "custom_new") {
-                 document.getElementById('custom_project_name').value = projectName;
-            }
-        }
-    }
-    
-    // 5. 載入工程名稱 (略)
-    function loadProjectName() {
-        const lastProject = localStorage.getItem(LAST_PROJECT_KEY);
-        const select = document.getElementById('project_select');
-        if (lastProject) {
-            let found = false;
-            for (let i = 0; i < select.options.length; i++) {
-                if (select.options[i].value === lastProject) {
-                    select.value = lastProject;
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                select.value = "custom_new";
-                document.getElementById('custom_project_name').value = lastProject;
-                document.getElementById('custom_project_div').style.display = "block";
-            } else {
-                document.getElementById('custom_project_div').style.display = "none";
-            }
-        }
-    }
-
-    // 6. 取得最終輸入值
-    function getInputValue(selectId, customInputId) {
-        const select = document.getElementById(selectId);
-        if (select.value === "custom_new") {
-            const customInput = document.getElementById(customInputId);
-            const value = customInput ? customInput.value.trim() : "";
-            if (value === "") {
-                return null; 
-            }
-            return value;
-        }
-        return select.value === "" ? null : select.value;
-    }
-    
-    // 7. 下載圖片功能
-    function downloadImage() {
-        const img = document.getElementById('result_image');
-        if (!img.src || img.src.startsWith('data:image/gif')) {
-            alert('請先生成照片！');
-            return;
-        }
-        
-        mergeAndDownload();
-    }
-    
-    // 輔助函式：將 DataURL 轉為 Blob (解決手機下載問題)
-    function dataURLtoBlob(dataurl) {
-        var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
-            bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
-        while(n--){
-            u8arr[n] = bstr.charCodeAt(n);
-        }
-        return new Blob([u8arr], {type:mime});
-    }
-
-    // 8. 合併繪圖和浮水印，並下載
-    function mergeAndDownload() {
-        const project = getInputValue('project_select', 'custom_project_name') || '工程照片';
-        const date = document.getElementById('date_time').value || '未知日期';
-        const originalImageSrc = document.getElementById('result_image').src; 
-
-        const img = new Image();
-        img.crossOrigin = 'Anonymous'; 
-        img.src = originalImageSrc;
-
-        img.onload = function() {
-            try {
-                const finalCanvas = document.createElement('canvas');
-                const finalCtx = finalCanvas.getContext('2d');
-
-                finalCanvas.width = img.width;
-                finalCanvas.height = img.height;
-                finalCtx.drawImage(img, 0, 0); 
-
-                finalCtx.drawImage(drawingCanvas, 0, 0); 
-
-                const dataURL = finalCanvas.toDataURL('image/jpeg', 0.95);
-                
-                // 修正：使用 Blob 下載以支援手機
-                const blob = dataURLtoBlob(dataURL);
-                const url = URL.createObjectURL(blob);
-                
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${project}_${date}_繪圖.jpg`; 
-                document.body.appendChild(a);
-                a.click();
-                
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(url);
-                }, 100);
-
-                displayStatus("✅ 照片已成功下載 (包含繪圖內容)！", false);
-
-            } catch (error) {
-                console.error("Download Merge Error:", error);
-                displayStatus(`🚫 下載合併失敗：${error.message}`, true);
-            }
-        };
-    }
-    
-    // 9. 清除所有內容 (略)
-    function clearForm() {
-        document.getElementById('photo').value = '';
-        document.getElementById('project_select').value = '';
-        document.getElementById('custom_project_name').value = '';
-        document.getElementById('custom_project_div').style.display = 'none';
-        
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        document.getElementById('date_time').value = `${year}-${month}-${day}`;
-        
-        document.getElementById('task_select').value = '';
-        document.getElementById('custom_task_name').value = '';
-        document.getElementById('custom_task_div').style.display = 'none';
-        document.getElementById('task_remark').value = '';
-        document.getElementById('position_select').value = '';
-        document.getElementById('floor_select').value = '';
-        document.getElementById('show_date_time').checked = true;
-
-        document.getElementById('status_message').style.display = 'none';
-        document.getElementById('result_area').style.display = 'none';
-        document.getElementById('result_image').src = '';
-        document.getElementById('download_button').style.display = 'none';
-        
-        if(drawingCanvas) drawingCanvas.style.pointerEvents = 'none';
-        clearDrawing();
-        
-        localStorage.removeItem(LAST_PROJECT_KEY);
-    }
-
-    // --- 繪圖功能實作 ---
-    // (getEventCoords, getCanvasCoords, drawArrowhead, setupDrawing 保持不變)
-    
-    // 10. 初始化繪圖
-    function setupDrawing() {
-        drawingCanvas = document.getElementById('drawing_canvas');
-        drawingCtx = drawingCanvas.getContext('2d');
-        
-        // 工具選擇
-        document.querySelectorAll('.tool-btn[data-tool]').forEach(button => {
-            button.addEventListener('click', () => {
-                currentTool = button.getAttribute('data-tool');
-                document.querySelectorAll('.tool-btn').forEach(btn => btn.removeAttribute('data-selected'));
-                button.setAttribute('data-selected', 'true');
-                isDrawing = false; 
+            let imgSrc = "";
+            if(file) imgSrc = await new Promise(r => {
+                const reader = new FileReader();
+                reader.onload = e => r(e.target.result);
+                reader.readAsDataURL(file);
             });
-        });
 
-        // 顏色選擇
-        document.querySelectorAll('.color-swatch').forEach(swatch => {
-            swatch.addEventListener('click', (e) => {
-                lineColor = e.target.getAttribute('data-color');
-                document.querySelectorAll('.color-swatch').forEach(s => s.removeAttribute('data-selected'));
-                e.target.setAttribute('data-selected', 'true');
+            const row = document.createElement('div');
+            row.className = 'photo-row';
+            row.innerHTML = `
+                <div class="photo-box">${imgSrc ? `<img src="${imgSrc}">` : ''}</div>
+                <div class="info-box">
+                    <div class="info-item"><span class="info-label">查驗位置：</span>${getVal('inspectPos')}</div>
+                    <div class="info-item"><span class="info-label">說明：</span>${desc} ${status}</div>
+                </div>
+            `;
+            photoContainer.appendChild(row);
+        }
+    }
+
+    async function downloadWord() {
+        const { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, ImageRun, AlignmentType, VerticalAlign, TextRun } = docx;
+
+        const createPhotoRow = async (num) => {
+            const file = document.getElementById('img'+num).files[0];
+            const desc = document.getElementById('desc'+num).value;
+            let status = "";
+            if(num===1 && document.getElementById('status1').checked) status = "改善前";
+            if(num>1) {
+                if(document.getElementById(`status${num}_ing`).checked) status = "改善中";
+                if(document.getElementById(`status${num}_after`).checked) status = "改善後";
+            }
+
+            let imgElement = new Paragraph("");
+            if(file) {
+                const buffer = await file.arrayBuffer();
+                imgElement = new Paragraph({
+                    children: [new ImageRun({ data: buffer, transformation: { width: 320, height: 240 } })],
+                    alignment: AlignmentType.CENTER
+                });
+            }
+
+            return new TableRow({
+                height: { value: 3000, rule: "atLeast" },
+                children: [
+                    new TableCell({ width: { size: 65, type: WidthType.PERCENTAGE }, verticalAlign: VerticalAlign.CENTER, children: [imgElement] }),
+                    new TableCell({ 
+                        width: { size: 35, type: WidthType.PERCENTAGE }, 
+                        children: [
+                            new Paragraph({ children: [new TextRun({text: "查驗位置：", bold: true}), new TextRun(getVal('inspectPos'))] }),
+                            new Paragraph({ spacing: { before: 200 } }),
+                            new Paragraph({ children: [new TextRun({text: "說明：", bold: true}), new TextRun(desc + " " + status)] })
+                        ],
+                        padding: { top: 100, left: 100 }
+                    })
+                ]
             });
+        };
+
+        const doc = new Document({
+            sections: [{
+                children: [
+                    new Paragraph({
+                        alignment: AlignmentType.CENTER,
+                        children: [
+                            new TextRun({ text: "自主檢查照片", bold: true, size: 36 }),
+                            new TextRun({ text: "\t\t編號: " + document.getElementById('serialNo').value, size: 20 })
+                        ]
+                    }),
+                    // 【表格 A】：標頭區塊
+                    new Table({
+                        width: { size: 100, type: WidthType.PERCENTAGE },
+                        rows: [
+                            new TableRow({ children: [
+                                new TableCell({ width: { size: 15, type: WidthType.PERCENTAGE }, children: [new Paragraph({text:"工程名稱", alignment: AlignmentType.CENTER})] }),
+                                new TableCell({ width: { size: 85, type: WidthType.PERCENTAGE }, columnSpan: 3, children: [new Paragraph(getVal('projName'))] })
+                            ]}),
+                            new TableRow({ children: [
+                                new TableCell({ width: { size: 15, type: WidthType.PERCENTAGE }, children: [new Paragraph({text:"承包廠商", alignment: AlignmentType.CENTER})] }),
+                                new TableCell({ width: { size: 35, type: WidthType.PERCENTAGE }, children: [new Paragraph("勝冠營造股份有限公司")] }),
+                                new TableCell({ width: { size: 15, type: WidthType.PERCENTAGE }, children: [new Paragraph({text:"查驗日期", alignment: AlignmentType.CENTER})] }),
+                                new TableCell({ width: { size: 35, type: WidthType.PERCENTAGE }, children: [new Paragraph(toROC(document.getElementById('inspectDate').value))] })
+                            ]}),
+                            new TableRow({ children: [
+                                new TableCell({ width: { size: 15, type: WidthType.PERCENTAGE }, children: [new Paragraph({text:"查驗項目", alignment: AlignmentType.CENTER})] }),
+                                new TableCell({ width: { size: 85, type: WidthType.PERCENTAGE }, columnSpan: 3, children: [new Paragraph(getVal('inspectItem'))] })
+                            ]})
+                        ]
+                    }),
+                    // 在兩個表格中間插入一個極小的空白段落，防止 Word 自動合併表格
+                    new Paragraph({ size: .2 }),
+                    // 【表格 B】：照片區塊
+                    new Table({
+                        width: { size: 100, type: WidthType.PERCENTAGE },
+                        rows: [
+                            await createPhotoRow(1),
+                            await createPhotoRow(2),
+                            await createPhotoRow(3)
+                        ]
+                    })
+                ]
+            }]
         });
 
-        // 線條粗細選擇
-        document.getElementById('line_width').addEventListener('input', (e) => {
-            lineWidth = parseInt(e.target.value, 10);
-        });
-
-        // 事件監聽 (滑鼠/觸控)
-        drawingCanvas.addEventListener('mousedown', startDrawing);
-        drawingCanvas.addEventListener('mousemove', draw);
-        drawingCanvas.addEventListener('mouseup', stopDrawing);
-        drawingCanvas.addEventListener('mouseout', stopDrawing);
-        drawingCanvas.addEventListener('touchstart', startDrawing);
-        drawingCanvas.addEventListener('touchmove', draw);
-        drawingCanvas.addEventListener('touchend', stopDrawing);
-        drawingCanvas.addEventListener('touchcancel', stopDrawing);
-    }
-    
-    // 【復原功能】: 儲存當前畫布狀態
-    function saveState() {
-        const dataURL = drawingCanvas.toDataURL();
-        if (drawingHistory.length >= MAX_HISTORY) {
-            drawingHistory.shift(); 
-        }
-        drawingHistory.push(dataURL);
-        
-        // **重要修改**: 只要有新的繪圖動作，就清空「重做」堆疊，避免邏輯衝突
-        redoStack = [];
-    }
-
-    // 【復原功能】: 執行復原 (Undo)
-    function undoDrawing() {
-        if (drawingHistory.length <= 1) {
-            clearDrawing(); 
-            drawingHistory = [];
-            redoStack = []; // 清空重做，因為已經空了
-            displayStatus("已復原到初始狀態。", false);
-            return;
-        }
-
-        // 1. 將當前狀態彈出並推入 Redo Stack
-        const currentState = drawingHistory.pop();
-        redoStack.push(currentState);
-
-        // 2. 取得上一個狀態
-        const lastState = drawingHistory[drawingHistory.length - 1]; 
-
-        // 3. 繪製上一個狀態
-        const img = new Image();
-        img.onload = function() {
-            drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
-            drawingCtx.drawImage(img, 0, 0);
-            displayStatus(`已復原至上一步。`, false);
-        };
-        img.src = lastState;
-    }
-
-    // 【重做功能】: 執行重做 (Redo)
-    function redoDrawing() {
-        if (redoStack.length === 0) {
-            displayStatus("沒有可重做的步驟。", false);
-            return;
-        }
-
-        // 1. 從 Redo Stack 取出最近一次被 Undo 的狀態
-        const nextState = redoStack.pop();
-
-        // 2. 將該狀態放回 History Stack
-        drawingHistory.push(nextState);
-
-        // 3. 繪製該狀態
-        const img = new Image();
-        img.onload = function() {
-            drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
-            drawingCtx.drawImage(img, 0, 0);
-            displayStatus(`已重做至下一步。`, false);
-        };
-        img.src = nextState;
-    }
-
-    function getEventCoords(e) {
-        if (e.touches && e.touches.length > 0) {
-            return e.touches[0];
-        }
-        if (e.changedTouches && e.changedTouches.length > 0) {
-            return e.changedTouches[0];
-        }
-        return e;
-    }
-
-    function getCanvasCoords(e) {
-        const rect = drawingCanvas.getBoundingClientRect();
-        const displayWidth = rect.width;
-        const displayHeight = rect.height;
-        
-        const intrinsicWidth = drawingCanvas.width;
-        const intrinsicHeight = drawingCanvas.height;
-
-        const scaleX = intrinsicWidth / displayWidth;
-        const scaleY = intrinsicHeight / displayHeight;
-        
-        return {
-            x: (e.clientX - rect.left) * scaleX,
-            y: (e.clientY - rect.top) * scaleY
-        };
-    }
-
-    function drawArrowhead(ctx, x, y, x0, y0, lineW) {
-        const angle = Math.atan2(y - y0, x - x0);
-        const headLen = lineW * 3; 
-        
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x - headLen * Math.cos(angle - Math.PI / 6), y - headLen * Math.sin(angle - Math.PI / 6));
-        ctx.moveTo(x, y);
-        ctx.lineTo(x - headLen * Math.cos(angle + Math.PI / 6), y - headLen * Math.sin(angle + Math.PI / 6));
-        ctx.stroke();
-    }
-
-    function startDrawing(e) {
-        if (drawingCanvas.style.pointerEvents !== 'auto') return; 
-        e.preventDefault(); 
-        
-        isDrawing = true;
-        const event = getEventCoords(e);
-        const coords = getCanvasCoords(event);
-        startX = coords.x;
-        startY = coords.y;
-
-        drawingCtx.strokeStyle = lineColor;
-        drawingCtx.lineWidth = lineWidth;
-        drawingCtx.lineCap = 'round';
-        drawingCtx.lineJoin = 'round';
-        
-        if (currentTool === 'line') {
-            drawingCtx.beginPath();
-            drawingCtx.moveTo(startX, startY);
-        }
-        if (currentTool !== 'line') {
-             // 非線條工具在開始繪製時，先保存當前狀態以便動態預覽
-             saveState(); 
-        }
-    }
-
-    function draw(e) {
-        if (!isDrawing) return;
-        e.preventDefault(); 
-        
-        const event = getEventCoords(e);
-        const coords = getCanvasCoords(event);
-
-        if (currentTool === 'line') {
-            drawingCtx.lineTo(coords.x, coords.y);
-            drawingCtx.stroke();
-        } 
-    }
-
-    function stopDrawing(e) {
-        if (!isDrawing) return;
-        e.preventDefault(); 
-        
-        isDrawing = false;
-        
-        const event = getEventCoords(e);
-        const coords = getCanvasCoords(event);
-        const endX = coords.x;
-        const endY = coords.y;
-
-        const distance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
-        
-        drawingCtx.strokeStyle = lineColor;
-        drawingCtx.lineWidth = lineWidth;
-
-        if (currentTool === 'rect' || currentTool === 'circle' || currentTool === 'arrow') {
-            if (drawingHistory.length > 0) {
-                 const lastState = drawingHistory[drawingHistory.length - 1];
-                 const img = new Image();
-                 img.onload = function() {
-                     drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
-                     drawingCtx.drawImage(img, 0, 0);
-                     drawFinalShape(startX, startY, endX, endY);
-                     saveState(); 
-                 };
-                 img.src = lastState;
-            } else {
-                 drawFinalShape(startX, startY, endX, endY);
-                 saveState();
-            }
-        } else if (currentTool === 'line') {
-            if (distance < 5) {
-                 drawingCtx.beginPath();
-                 drawingCtx.arc(startX, startY, lineWidth / 2, 0, 2 * Math.PI);
-                 drawingCtx.fillStyle = lineColor;
-                 drawingCtx.fill();
-            }
-            saveState(); // 線條結束時保存狀態
-        }
-    }
-
-    function drawFinalShape(x0, y0, x1, y1) {
-         const w = x1 - x0;
-         const h = y1 - y0;
-         const distance = Math.sqrt(Math.pow(w, 2) + Math.pow(h, 2));
-
-         if (distance < 5 && currentTool !== 'arrow') return; 
-
-         if (currentTool === 'rect') {
-             drawingCtx.strokeRect(x0, y0, w, h);
-         } else if (currentTool === 'circle') {
-             const radiusX = Math.abs(w / 2);
-             const radiusY = Math.abs(h / 2);
-             const centerX = x0 + w / 2;
-             const centerY = y0 + h / 2;
-
-             drawingCtx.beginPath();
-             drawingCtx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
-             drawingCtx.stroke();
-         } else if (currentTool === 'arrow') {
-             drawingCtx.beginPath();
-             drawingCtx.moveTo(x0, y0);
-             drawingCtx.lineTo(x1, y1);
-             drawingCtx.stroke();
-             drawArrowhead(drawingCtx, x1, y1, x0, y0, lineWidth);
-         }
-    }
-
-    function clearDrawing() {
-        if(drawingCanvas) {
-             drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
-             drawingHistory = []; 
-             redoStack = []; // 清除繪圖時也清空重做紀錄
-        }
-    }
-
-    // 11. 核心功能：生成浮水印照片
-    function generateWatermark() {
-        displayStatus("正在處理中，請稍候...");
-        
-        const photoInput = document.getElementById('photo');
-        
-        // 取得所有輸入值 (允許為 null)
-        const project = getInputValue('project_select', 'custom_project_name');
-        const date = document.getElementById('date_time').value;
-        const floor = document.getElementById('floor_select').value;
-        const task = getInputValue('task_select', 'custom_task_name');
-        const position = document.getElementById('position_select').value;
-        const showTime = document.getElementById('show_date_time').checked;
-        const remark = document.getElementById('task_remark').value.trim(); 
-
-        // 修改驗證：只有照片是必填
-        if (!photoInput.files || !photoInput.files[0]) {
-            displayStatus("🚫 錯誤：請務必選擇一張照片！", true);
-            return;
-        }
-        
-        const reader = new FileReader();
-        
-        reader.onload = function(e) {
-            const img = new Image();
-            img.src = e.target.result;
-
-            img.onload = function() {
-                try {
-                    // --- 核心修正：安全尺寸調整機制 ---
-                    const MAX_SIZE = 4096; 
-                    let newWidth = img.width;
-                    let newHeight = img.height;
-
-                    if (newWidth > newHeight && newWidth > MAX_SIZE) {
-                        newHeight = Math.round(newHeight * MAX_SIZE / newWidth);
-                        newWidth = MAX_SIZE;
-                    } else if (newHeight > MAX_SIZE) {
-                        newWidth = Math.round(newWidth * MAX_SIZE / newHeight);
-                        newHeight = MAX_SIZE;
-                    }
-
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-
-                    canvas.width = newWidth;
-                    canvas.height = newHeight;
-                    ctx.drawImage(img, 0, 0, newWidth, newHeight);
-                    
-                    drawingCanvas.width = newWidth;
-                    drawingCanvas.height = newHeight;
-                    
-                    ctx.drawImage(drawingCanvas, 0, 0);
-
-
-                    // --- 繪製浮水印邏輯 ---
-                    
-                    // 1. 檢查是否進入「舊式相機模式」：只有時間，沒有其他資訊
-                    const isOnlyTimeMode = showTime && date && !project && !task && !remark && !position && !floor;
-
-                    const baseSize = canvas.width;
-                    
-                    if (isOnlyTimeMode) {
-                        // === 舊式相機風格 (橘色、右下角、無黑底框) ===
-                        
-                        // 設定字體：稍微大一點，Monospace (等寬字體) 比較像電子打印
-                        const retroFontSize = Math.floor(baseSize * 0.04); 
-                        ctx.font = `bold ${retroFontSize}px "Courier New", "Arial", sans-serif`;
-                        ctx.textBaseline = 'bottom';
-                        ctx.textAlign = 'right'; // 靠右對齊
-
-                        // 設定顏色：橘色
-                        ctx.fillStyle = '#FF6600'; // 經典相機橘
-
-                        // 設定陰影：增加一點發光感/可讀性，模擬底片打印效果
-                        ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
-                        ctx.shadowBlur = 2;
-                        ctx.shadowOffsetX = 1;
-                        ctx.shadowOffsetY = 1;
-
-                        // 計算位置：右下角，留一點邊距
-                        const padding = retroFontSize * 0.8;
-                        const x = canvas.width - padding;
-                        const y = canvas.height - padding;
-
-                        // 繪製文字 (直接畫日期，不加 "時間：" 前綴)
-                        ctx.fillText(date, x, y);
-
-                        // 重置陰影設定，避免影響後續繪圖 (如果有)
-                        ctx.shadowColor = "transparent";
-
-                    } else {
-                        // === 原有工業風模式 (黃字黑底、左下角) ===
-
-                        const fontSize = Math.floor(baseSize * 0.025); 
-                        const lineHeight = fontSize * 1.4;
-                        const paddingFactor = 0.8; 
-                        const padding = fontSize * paddingFactor; 
-                        
-                        ctx.font = `bold ${fontSize}px "Microsoft JhengHei", Arial`;
-                        ctx.textBaseline = 'bottom';
-                        ctx.textAlign = 'left'; 
-                        
-                        let startY = canvas.height - padding;
-
-                        // 智慧構建文字陣列
-                        let lines = [];
-                        if (project) lines.push(project);
-                        if (showTime && date) lines.push(`時間： ${date}`);
-                        if (task) lines.push(`工項： ${task}`);
-                        if (remark) lines.push(`備註： ${remark}`);
-                        if (position) lines.push(`位置： ${position}`);
-                        if (floor) lines.push(`樓層： ${floor}`);
-
-                        // 只有當有內容時才繪製
-                        if (lines.length > 0) {
-                            // 計算背景寬度
-                            let maxWidth = 0;
-                            lines.forEach(line => {
-                                const currentWidth = ctx.measureText(line).width;
-                                if (currentWidth > maxWidth) {
-                                    maxWidth = currentWidth;
-                                }
-                            });
-                            
-                            const backgroundWidth = maxWidth + 2 * padding; 
-                            const totalHeight = lines.length * lineHeight + (lines.length > 0 ? lineHeight * 0.5 : 0);
-                            
-                            const backgroundY = startY - totalHeight + lineHeight * 0.5;
-                            const backgroundX = canvas.width - backgroundWidth; 
-                            const startX = backgroundX + padding; 
-
-                            // 繪製半透明黑底
-                            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'; 
-                            ctx.fillRect(backgroundX, backgroundY, backgroundWidth, totalHeight + padding); 
-
-                            // 繪製文字
-                            lines.forEach((line, index) => {
-                                const y = startY - ((lines.length - 1 - index) * lineHeight);
-                                
-                                ctx.strokeStyle = 'black';
-                                ctx.lineWidth = fontSize / 8;
-                                ctx.strokeText(line, startX, y); 
-
-                                ctx.fillStyle = '#FFD700'; 
-                                ctx.fillText(line, startX, y); 
-                            });
-                        }
-                    }
-
-                    // 輸出結果
-                    const dataURL = canvas.toDataURL('image/jpeg', 0.9);
-                    const resultImg = document.getElementById('result_image');
-                    resultImg.src = dataURL;
-                    
-                    document.getElementById('result_area').style.display = 'block';
-                    document.getElementById('download_button').style.display = 'block';
-                    
-                    clearDrawing(); 
-                    saveState(); 
-                    drawingCanvas.style.pointerEvents = 'auto'; 
-                    
-                    displayStatus("✅ 浮水印照片已成功生成！", false);
-                    document.getElementById('result_area').scrollIntoView({ behavior: 'smooth' });
-
-                } catch (error) {
-                    console.error("Canvas Processing Error:", error);
-                    displayStatus(`🚫 內部錯誤：${error.message}`, true);
-                }
-            };
-        };
-        
-        reader.onerror = function(e) {
-            displayStatus("🚫 檔案讀取失敗！", true);
-        };
-
-        reader.readAsDataURL(photoInput.files[0]);
+        Packer.toBlob(doc).then(blob => saveAs(blob, "自主檢查改善照片.docx"));
     }
 </script>
-
 </body>
 </html>
