@@ -88,13 +88,13 @@
         <div class="photo-card">
             <label>照片 1</label>
             <input type="file" id="img1" accept="image/*" capture="environment">
-            <input type="text" id="desc1" placeholder="輸入說明文字 (點此輸入)">
+            <input type="text" id="desc1" placeholder="輸入說明文字">
             <div class="checkbox-group"><label><input type="checkbox" id="status1"> 改善前</label></div>
         </div>
         <div class="photo-card">
             <label>照片 2</label>
             <input type="file" id="img2" accept="image/*" capture="environment">
-            <input type="text" id="desc2" placeholder="輸入說明文字 (點此輸入)">
+            <input type="text" id="desc2" placeholder="輸入說明文字">
             <div class="checkbox-group">
                 <label><input type="checkbox" id="status2_ing"> 改善中</label>
                 <label><input type="checkbox" id="status2_after"> 改善後</label>
@@ -103,7 +103,7 @@
         <div class="photo-card">
             <label>照片 3</label>
             <input type="file" id="img3" accept="image/*" capture="environment">
-            <input type="text" id="desc3" placeholder="輸入說明文字 (點此輸入)">
+            <input type="text" id="desc3" placeholder="輸入說明文字">
             <div class="checkbox-group">
                 <label><input type="checkbox" id="status3_ing"> 改善中</label>
                 <label><input type="checkbox" id="status3_after"> 改善後</label>
@@ -214,22 +214,37 @@
             let imgElement = new Paragraph("");
             if(file) {
                 const buffer = await file.arrayBuffer();
+                // 設定高度為 7cm (約 198 pt)，寬度比例縮放 (依 4:3 比例預設約 264 pt)
                 imgElement = new Paragraph({
-                    children: [new ImageRun({ data: buffer, transformation: { width: 320, height: 240 } })],
+                    children: [new ImageRun({ data: buffer, transformation: { width: 264, height: 198 } })],
                     alignment: AlignmentType.CENTER
                 });
             }
 
             return new TableRow({
-                height: { value: 3000, rule: "atLeast" },
+                height: { value: 3969, rule: "exact" }, // 7公分
                 children: [
-                    new TableCell({ width: { size: 65, type: WidthType.PERCENTAGE }, verticalAlign: VerticalAlign.CENTER, children: [imgElement] }),
                     new TableCell({ 
-                        width: { size: 35, type: WidthType.PERCENTAGE }, 
+                        width: { size: 5670, type: WidthType.DXA }, // 10公分
+                        verticalAlign: VerticalAlign.CENTER, 
+                        children: [imgElement] 
+                    }),
+                    new TableCell({ 
+                        width: { size: 4536, type: WidthType.DXA }, 
                         children: [
-                            new Paragraph({ children: [new TextRun({text: "查驗位置：", bold: true}), new TextRun(getVal('inspectPos'))] }),
+                            new Paragraph({ 
+                                children: [
+                                    new TextRun({text: "查驗位置：", bold: true, size: 24}),
+                                    new TextRun({text: getVal('inspectPos'), size: 24})
+                                ] 
+                            }),
                             new Paragraph({ spacing: { before: 200 } }),
-                            new Paragraph({ children: [new TextRun({text: "說明：", bold: true}), new TextRun(desc + " " + status)] })
+                            new Paragraph({ 
+                                children: [
+                                    new TextRun({text: "說明：", bold: true, size: 24}), 
+                                    new TextRun({text: desc + " " + status, size: 24})
+                                ] 
+                            })
                         ],
                         padding: { top: 100, left: 100 }
                     })
@@ -239,6 +254,11 @@
 
         const doc = new Document({
             sections: [{
+                properties: {
+                    page: {
+                        margin: { top: 850.5, bottom: 850.5, left: 850.5, right: 850.5 } // 1.5cm 邊界
+                    }
+                },
                 children: [
                     new Paragraph({
                         alignment: AlignmentType.CENTER,
@@ -247,29 +267,63 @@
                             new TextRun({ text: "\t\t編號: " + document.getElementById('serialNo').value, size: 20 })
                         ]
                     }),
-                    // 【表格 A】：標頭區塊
                     new Table({
                         width: { size: 100, type: WidthType.PERCENTAGE },
                         rows: [
-                            new TableRow({ children: [
-                                new TableCell({ width: { size: 15, type: WidthType.PERCENTAGE }, children: [new Paragraph({text:"工程名稱", alignment: AlignmentType.CENTER})] }),
-                                new TableCell({ width: { size: 85, type: WidthType.PERCENTAGE }, columnSpan: 3, children: [new Paragraph(getVal('projName'))] })
-                            ]}),
-                            new TableRow({ children: [
-                                new TableCell({ width: { size: 15, type: WidthType.PERCENTAGE }, children: [new Paragraph({text:"承包廠商", alignment: AlignmentType.CENTER})] }),
-                                new TableCell({ width: { size: 35, type: WidthType.PERCENTAGE }, children: [new Paragraph("勝冠營造股份有限公司")] }),
-                                new TableCell({ width: { size: 15, type: WidthType.PERCENTAGE }, children: [new Paragraph({text:"查驗日期", alignment: AlignmentType.CENTER})] }),
-                                new TableCell({ width: { size: 35, type: WidthType.PERCENTAGE }, children: [new Paragraph(toROC(document.getElementById('inspectDate').value))] })
-                            ]}),
-                            new TableRow({ children: [
-                                new TableCell({ width: { size: 15, type: WidthType.PERCENTAGE }, children: [new Paragraph({text:"查驗項目", alignment: AlignmentType.CENTER})] }),
-                                new TableCell({ width: { size: 85, type: WidthType.PERCENTAGE }, columnSpan: 3, children: [new Paragraph(getVal('inspectItem'))] })
-                            ]})
+                            new TableRow({ 
+                                height: { value: 567, rule: "exact" }, // 1公分
+                                children: [
+                                    new TableCell({ 
+                                        width: { size: 15, type: WidthType.PERCENTAGE }, 
+                                        verticalAlign: VerticalAlign.CENTER,
+                                        children: [new Paragraph({ children: [new TextRun({text: "工程名稱", size: 24})], alignment: AlignmentType.CENTER})] 
+                                    }),
+                                    new TableCell({ 
+                                        width: { size: 85, type: WidthType.PERCENTAGE }, 
+                                        columnSpan: 3, 
+                                        verticalAlign: VerticalAlign.CENTER,
+                                        children: [new Paragraph({ children: [new TextRun({text: getVal('projName'), size: 24})]})] 
+                                    })
+                                ]
+                            }),
+                            new TableRow({ 
+                                height: { value: 567, rule: "exact" }, // 1公分
+                                children: [
+                                    new TableCell({ 
+                                        verticalAlign: VerticalAlign.CENTER,
+                                        children: [new Paragraph({ children: [new TextRun({text: "承包廠商", size: 24})], alignment: AlignmentType.CENTER})] 
+                                    }),
+                                    new TableCell({ 
+                                        verticalAlign: VerticalAlign.CENTER,
+                                        children: [new Paragraph({ children: [new TextRun({text: "勝冠營造股份有限公司", size: 24})]})] 
+                                    }),
+                                    new TableCell({ 
+                                        verticalAlign: VerticalAlign.CENTER,
+                                        children: [new Paragraph({ children: [new TextRun({text: "查驗日期", size: 24})], alignment: AlignmentType.CENTER})] 
+                                    }),
+                                    new TableCell({ 
+                                        verticalAlign: VerticalAlign.CENTER,
+                                        children: [new Paragraph({ children: [new TextRun({text: toROC(document.getElementById('inspectDate').value), size: 24})]})] 
+                                    })
+                                ]
+                            }),
+                            new TableRow({ 
+                                height: { value: 567, rule: "exact" }, // 1公分
+                                children: [
+                                    new TableCell({ 
+                                        verticalAlign: VerticalAlign.CENTER,
+                                        children: [new Paragraph({ children: [new TextRun({text: "查驗項目", size: 24})], alignment: AlignmentType.CENTER})] 
+                                    }),
+                                    new TableCell({ 
+                                        columnSpan: 3, 
+                                        verticalAlign: VerticalAlign.CENTER,
+                                        children: [new Paragraph({ children: [new TextRun({text: getVal('inspectItem'), size: 24})]})] 
+                                    })
+                                ]
+                            })
                         ]
                     }),
-                    // 在兩個表格中間插入一個極小的空白段落，防止 Word 自動合併表格
-                    new Paragraph({ size: .2 }),
-                    // 【表格 B】：照片區塊
+                    new Paragraph({ spacing: { before: 0, after: 0 }, size: 1 }),
                     new Table({
                         width: { size: 100, type: WidthType.PERCENTAGE },
                         rows: [
