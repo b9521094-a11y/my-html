@@ -7,7 +7,7 @@
     <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
-        body { font-family: "Microsoft JhengHei", sans-serif; padding: 10px; background-color: #f0f2f5; }
+        body { font-family: "Microsoft JhengHei", "標楷體", sans-serif; padding: 10px; background-color: #f0f2f5; }
         .container { background: white; padding: 15px; border-radius: 8px; max-width: 800px; margin: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .form-group { margin-bottom: 12px; }
         .flex-row { display: flex; gap: 10px; }
@@ -87,13 +87,13 @@
     <div id="upload-sections">
         <div class="photo-card">
             <label>照片 1</label>
-            <input type="file" id="img1" accept="image/*" capture="environment">
+            <input type="file" id="img1" accept="image/*">
             <input type="text" id="desc1" placeholder="輸入說明文字">
             <div class="checkbox-group"><label><input type="checkbox" id="status1"> 改善前</label></div>
         </div>
         <div class="photo-card">
             <label>照片 2</label>
-            <input type="file" id="img2" accept="image/*" capture="environment">
+            <input type="file" id="img2" accept="image/*">
             <input type="text" id="desc2" placeholder="輸入說明文字">
             <div class="checkbox-group">
                 <label><input type="checkbox" id="status2_ing"> 改善中</label>
@@ -102,7 +102,7 @@
         </div>
         <div class="photo-card">
             <label>照片 3</label>
-            <input type="file" id="img3" accept="image/*" capture="environment">
+            <input type="file" id="img3" accept="image/*">
             <input type="text" id="desc3" placeholder="輸入說明文字">
             <div class="checkbox-group">
                 <label><input type="checkbox" id="status3_ing"> 改善中</label>
@@ -214,7 +214,6 @@
             let imgElement = new Paragraph("");
             if(file) {
                 const buffer = await file.arrayBuffer();
-                // 設定高度為 7cm (約 198 pt)，寬度比例縮放 (依 4:3 比例預設約 264 pt)
                 imgElement = new Paragraph({
                     children: [new ImageRun({ data: buffer, transformation: { width: 264, height: 198 } })],
                     alignment: AlignmentType.CENTER
@@ -234,15 +233,15 @@
                         children: [
                             new Paragraph({ 
                                 children: [
-                                    new TextRun({text: "查驗位置：", bold: true, size: 24}),
-                                    new TextRun({text: getVal('inspectPos'), size: 24})
+                                    new TextRun({text: "查驗位置：", bold: true, size: 24, font: "標楷體"}),
+                                    new TextRun({text: getVal('inspectPos'), size: 24, font: "標楷體"})
                                 ] 
                             }),
                             new Paragraph({ spacing: { before: 200 } }),
                             new Paragraph({ 
                                 children: [
-                                    new TextRun({text: "說明：", bold: true, size: 24}), 
-                                    new TextRun({text: desc + " " + status, size: 24})
+                                    new TextRun({text: "說明：", bold: true, size: 24, font: "標楷體"}), 
+                                    new TextRun({text: desc + " " + status, size: 24, font: "標楷體"})
                                 ] 
                             })
                         ],
@@ -253,6 +252,17 @@
         };
 
         const doc = new Document({
+            // 設定全文件預設字體為標楷體
+            styles: {
+                default: {
+                    document: {
+                        run: {
+                            font: "標楷體",
+                            size: 24
+                        },
+                    },
+                },
+            },
             sections: [{
                 properties: {
                     page: {
@@ -263,8 +273,8 @@
                     new Paragraph({
                         alignment: AlignmentType.CENTER,
                         children: [
-                            new TextRun({ text: "自主檢查照片", bold: true, size: 36 }),
-                            new TextRun({ text: "\t\t編號: " + document.getElementById('serialNo').value, size: 20 })
+                            new TextRun({ text: "自主檢查照片", bold: true, size: 36, font: "標楷體" }),
+                            new TextRun({ text: "\t\t編號: " + document.getElementById('serialNo').value, size: 20, font: "標楷體" })
                         ]
                     }),
                     new Table({
@@ -276,13 +286,13 @@
                                     new TableCell({ 
                                         width: { size: 15, type: WidthType.PERCENTAGE }, 
                                         verticalAlign: VerticalAlign.CENTER,
-                                        children: [new Paragraph({ children: [new TextRun({text: "工程名稱", size: 24})], alignment: AlignmentType.CENTER})] 
+                                        children: [new Paragraph({ children: [new TextRun({text: "工程名稱", size: 24, font: "標楷體"})], alignment: AlignmentType.CENTER})] 
                                     }),
                                     new TableCell({ 
                                         width: { size: 85, type: WidthType.PERCENTAGE }, 
                                         columnSpan: 3, 
                                         verticalAlign: VerticalAlign.CENTER,
-                                        children: [new Paragraph({ children: [new TextRun({text: getVal('projName'), size: 24})]})] 
+                                        children: [new Paragraph({ children: [new TextRun({text: getVal('projName'), size: 24, font: "標楷體"})]})] 
                                     })
                                 ]
                             }),
@@ -291,19 +301,19 @@
                                 children: [
                                     new TableCell({ 
                                         verticalAlign: VerticalAlign.CENTER,
-                                        children: [new Paragraph({ children: [new TextRun({text: "承包廠商", size: 24})], alignment: AlignmentType.CENTER})] 
+                                        children: [new Paragraph({ children: [new TextRun({text: "承包廠商", size: 24, font: "標楷體"})], alignment: AlignmentType.CENTER})] 
                                     }),
                                     new TableCell({ 
                                         verticalAlign: VerticalAlign.CENTER,
-                                        children: [new Paragraph({ children: [new TextRun({text: "勝冠營造股份有限公司", size: 24})]})] 
+                                        children: [new Paragraph({ children: [new TextRun({text: "勝冠營造股份有限公司", size: 24, font: "標楷體"})]})] 
                                     }),
                                     new TableCell({ 
                                         verticalAlign: VerticalAlign.CENTER,
-                                        children: [new Paragraph({ children: [new TextRun({text: "查驗日期", size: 24})], alignment: AlignmentType.CENTER})] 
+                                        children: [new Paragraph({ children: [new TextRun({text: "查驗日期", size: 24, font: "標楷體"})], alignment: AlignmentType.CENTER})] 
                                     }),
                                     new TableCell({ 
                                         verticalAlign: VerticalAlign.CENTER,
-                                        children: [new Paragraph({ children: [new TextRun({text: toROC(document.getElementById('inspectDate').value), size: 24})]})] 
+                                        children: [new Paragraph({ children: [new TextRun({text: toROC(document.getElementById('inspectDate').value), size: 24, font: "標楷體"})]})] 
                                     })
                                 ]
                             }),
@@ -312,12 +322,12 @@
                                 children: [
                                     new TableCell({ 
                                         verticalAlign: VerticalAlign.CENTER,
-                                        children: [new Paragraph({ children: [new TextRun({text: "查驗項目", size: 24})], alignment: AlignmentType.CENTER})] 
+                                        children: [new Paragraph({ children: [new TextRun({text: "查驗項目", size: 24, font: "標楷體"})], alignment: AlignmentType.CENTER})] 
                                     }),
                                     new TableCell({ 
                                         columnSpan: 3, 
                                         verticalAlign: VerticalAlign.CENTER,
-                                        children: [new Paragraph({ children: [new TextRun({text: getVal('inspectItem'), size: 24})]})] 
+                                        children: [new Paragraph({ children: [new TextRun({text: getVal('inspectItem'), size: 24, font: "標楷體"})]})] 
                                     })
                                 ]
                             })
